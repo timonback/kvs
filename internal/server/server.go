@@ -6,24 +6,20 @@ import (
 	"github.com/timonback/keyvaluestore/internal"
 	"github.com/timonback/keyvaluestore/internal/cli"
 	"github.com/timonback/keyvaluestore/internal/server/filter"
+	"github.com/timonback/keyvaluestore/internal/server/handler"
 	"net/http"
 	"os"
 	"os/signal"
-	"sync/atomic"
 	"time"
-)
-
-var (
-	healthy int32
 )
 
 func StartServer(arguments *cli.Arguments) {
 	internal.Logger.Println("Server is starting...")
 
 	router := http.NewServeMux()
-	router.Handle("/healthz", healthz())
-	router.Handle("/hello", index())
-	router.Handle("/debug", debug())
+	router.Handle("/healthz", handler.Healthz())
+	router.Handle("/hello", handler.Index())
+	router.Handle("/debug", handler.Debug())
 	router.Handle("/ui/", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
 
 	nextRequestID := func() string {
@@ -46,7 +42,7 @@ func StartServer(arguments *cli.Arguments) {
 	go func() {
 		<-quit
 		internal.Logger.Println("Server is shutting down...")
-		atomic.StoreInt32(&healthy, 0)
+		handler.SetHealthy(handler.NON_HEALTHY)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
@@ -59,41 +55,11 @@ func StartServer(arguments *cli.Arguments) {
 	}()
 
 	internal.Logger.Println("Server is ready to handle requests at", arguments.ListenAddr)
-	atomic.StoreInt32(&healthy, 1)
+	handler.SetHealthy(handler.HEALTHY)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		internal.Logger.Fatalf("Could not listen on %s: %v\n", arguments.ListenAddr, err)
 	}
 
 	<-done
 	internal.Logger.Println("Server stopped")
-}
-
-func debug() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("X-INFO", r.RequestURI)
-		fmt.Fprintln(w, r.RequestURI)
-	})
-}
-
-func index() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, "Hello, World!")
-	})
-}
-
-func healthz() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if atomic.LoadInt32(&healthy) == 1 {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		w.WriteHeader(http.StatusServiceUnavailable)
-	})
 }
