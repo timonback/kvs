@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/timonback/keyvaluestore/internal"
 	"github.com/timonback/keyvaluestore/internal/cli"
+	context2 "github.com/timonback/keyvaluestore/internal/server/context"
 	"github.com/timonback/keyvaluestore/internal/server/filter"
 	"github.com/timonback/keyvaluestore/internal/server/handler"
 	"net/http"
@@ -19,6 +20,7 @@ func StartServer(arguments *cli.Arguments) {
 	router := http.NewServeMux()
 	router.Handle("/healthz", handler.Healthz())
 	router.Handle("/hello", handler.Index())
+	router.Handle(context2.HandlerPathStore, handler.Store())
 	router.Handle("/debug", handler.Debug())
 	router.Handle("/ui/", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
 

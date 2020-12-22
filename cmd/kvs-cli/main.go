@@ -13,7 +13,7 @@ func main() {
 
 	arguments := cli.ParseArguments()
 
-	resp, err := http.Get(arguments.Protocol + arguments.ListenAddr)
+	resp, err := http.Get(arguments.Protocol + arguments.ListenAddr + "/api/store/item")
 	if err != nil {
 		internal.Logger.Fatal(err)
 	}
