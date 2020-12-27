@@ -18,13 +18,16 @@ func (s *InmemoryService) Read(path Path) (Item, error) {
 }
 
 func (s *InmemoryService) Create(path Path, item Item) error {
+	if _, ok := s.store[path]; ok == true {
+		return DuplicateKeyError
+	}
 	s.store[path] = item
 	return nil
 }
 
 func (s *InmemoryService) Update(path Path, item Item) error {
 	if _, ok := s.store[path]; ok != true {
-		return DuplicateKeyError
+		return NotFoundError
 	}
 	s.store[path] = item
 	return nil
