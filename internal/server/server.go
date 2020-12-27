@@ -22,7 +22,6 @@ func StartServer(arguments *arguments.Server, store store2.Service) {
 	router.Handle("/healthz", handler.Healthz())
 	router.Handle("/hello", handler.Index())
 	router.Handle(context2.HandlerPathStore, handler.Store(store))
-	router.Handle("/debug", handler.Debug())
 	router.Handle("/ui/", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
 
 	nextRequestID := func() string {
