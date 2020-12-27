@@ -10,6 +10,9 @@ type FilesystemService struct {
 	pathPrefix string
 }
 
+/**
+Store implementation which uses the filesystem for persistent storage
+*/
 func NewStoreFilesystemService(pathPrefix string) Service {
 	return &FilesystemService{
 		pathPrefix: pathPrefix,

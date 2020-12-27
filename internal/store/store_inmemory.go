@@ -4,6 +4,9 @@ type InmemoryService struct {
 	store map[Path]Item
 }
 
+/**
+Store implementation which is in-memory only
+*/
 func NewStoreInmemoryService() Service {
 	return &InmemoryService{
 		store: make(map[Path]Item),
