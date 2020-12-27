@@ -4,23 +4,24 @@ import (
 	"context"
 	"fmt"
 	"github.com/timonback/keyvaluestore/internal"
-	"github.com/timonback/keyvaluestore/internal/cli"
+	"github.com/timonback/keyvaluestore/internal/arguments"
 	context2 "github.com/timonback/keyvaluestore/internal/server/context"
 	"github.com/timonback/keyvaluestore/internal/server/filter"
 	"github.com/timonback/keyvaluestore/internal/server/handler"
+	store2 "github.com/timonback/keyvaluestore/internal/store"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 )
 
-func StartServer(arguments *cli.Arguments) {
+func StartServer(arguments *arguments.Server, store store2.Service) {
 	internal.Logger.Println("Server is starting...")
 
 	router := http.NewServeMux()
 	router.Handle("/healthz", handler.Healthz())
 	router.Handle("/hello", handler.Index())
-	router.Handle(context2.HandlerPathStore, handler.Store())
+	router.Handle(context2.HandlerPathStore, handler.Store(store))
 	router.Handle("/debug", handler.Debug())
 	router.Handle("/ui/", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
 

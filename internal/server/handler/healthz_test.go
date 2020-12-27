@@ -6,25 +6,29 @@ import (
 	"testing"
 )
 
-func TestHealthCheckHandler(t *testing.T) {
+func TestHealthCheckHandlerNonHealthy(t *testing.T) {
 	req, err := http.NewRequest("GET", "/healthz", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	rr := httptest.NewRecorder()
-	SetHealthy(NON_HEALTHY)
 
 	Healthz().ServeHTTP(rr, req)
 	if status := rr.Code; status != http.StatusServiceUnavailable {
-		t.Errorf("hanlder reqturned wrong status code: got %v want %v", status, http.StatusServiceUnavailable)
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusServiceUnavailable)
 	}
-
-	rr2 := httptest.NewRecorder()
+}
+func TestHealthCheckHandlerHealthy(t *testing.T) {
+	req, err := http.NewRequest("GET", "/healthz", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
 	SetHealthy(HEALTHY)
 
-	Healthz().ServeHTTP(rr2, req)
-	if status := rr2.Code; status != http.StatusNoContent {
-		t.Errorf("hanlder reqturned wrong status code: got %v want %v", status, http.StatusNoContent)
+	Healthz().ServeHTTP(rr, req)
+	if status := rr.Code; status != http.StatusNoContent {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusNoContent)
 	}
 }

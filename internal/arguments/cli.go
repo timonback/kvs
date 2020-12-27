@@ -1,14 +1,14 @@
-package cli
+package arguments
 
 import "flag"
 
-type Arguments struct {
+type Cli struct {
 	ListenAddr string
 	Protocol   string
 }
 
-func ParseArguments() Arguments {
-	arguments := Arguments{}
+func ParseCliArguments() Cli {
+	arguments := Cli{}
 
 	flag.StringVar(&arguments.ListenAddr, "listen-addr", ":80", "server listen address")
 	flag.StringVar(&arguments.Protocol, "protocol", "http://", "server listen protocol")
