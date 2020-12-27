@@ -26,7 +26,7 @@ func (s *FilesystemService) Name() string {
 func (s *FilesystemService) pathToFilename(path Path) string {
 	wd, _ := os.Getwd()
 
-	return wd + "/" + s.pathPrefix + "_fs_" + strings.ReplaceAll(string(path), "/", "_")
+	return wd + "/" + s.pathPrefix + "_fs_" + base64.StdEncoding.EncodeToString([]byte(path))
 }
 
 func (s *FilesystemService) fileExists(path Path) bool {
