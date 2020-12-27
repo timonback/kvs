@@ -9,14 +9,18 @@ import (
 )
 
 type storeRequestPost struct {
-	Content []byte `json:"data"`
+	Content string `json:"data"`
 }
 
 type storeResponse struct{}
 
+type storeReponseList struct {
+	Paths []store2.Path `json:"paths"`
+}
+
 type storeResponseGet struct {
 	Key     string `json:"key"`
-	Content []byte `json:"content"`
+	Content string `json:"content"`
 }
 
 func Store(store store2.Service) http.Handler {
@@ -29,7 +33,14 @@ func Store(store store2.Service) http.Handler {
 
 		message := []byte(nil)
 
-		if r.Method == "GET" {
+		if storePath == "" && r.Method == "GET" {
+			paths := store.Paths()
+			response := storeReponseList{
+				Paths: paths,
+			}
+
+			message, _ = json.Marshal(response)
+		} else if r.Method == "GET" {
 			item, err := store.Read(store2.Path(storePath))
 			if err != nil {
 				HandleError(w, r, http.StatusNoContent, err, params)

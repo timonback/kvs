@@ -11,8 +11,8 @@ import (
 	"testing"
 )
 
-func newRequest(t *testing.T, method string, body io.Reader) *http.Request {
-	req, err := http.NewRequest(method, context.HandlerPathStore+"key", body)
+func newRequest(t *testing.T, method string, path string, body io.Reader) *http.Request {
+	req, err := http.NewRequest(method, context.HandlerPathStore+path, body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,24 +20,37 @@ func newRequest(t *testing.T, method string, body io.Reader) *http.Request {
 	return req
 }
 
+func newListRequest(t *testing.T) *http.Request {
+	return newRequest(t, "GET", "", nil)
+}
+
 func newGetRequest(t *testing.T) *http.Request {
-	return newRequest(t, "GET", nil)
+	return newRequest(t, "GET", "key", nil)
 }
 
 func newPostRequest(t *testing.T, request storeRequestPost) *http.Request {
 	requestJson, _ := json.Marshal(request)
-	return newRequest(t, "POST", strings.NewReader(string(requestJson)))
+	return newRequest(t, "POST", "key", strings.NewReader(string(requestJson)))
 }
 
 func newPutRequest(t *testing.T, request storeRequestPost) *http.Request {
 	requestJson, _ := json.Marshal(request)
-	return newRequest(t, "PUT", strings.NewReader(string(requestJson)))
+	return newRequest(t, "PUT", "key", strings.NewReader(string(requestJson)))
 }
 
 func newDeleteRequest(t *testing.T) *http.Request {
-	return newRequest(t, "DELETE", nil)
+	return newRequest(t, "DELETE", "key", nil)
 }
 
+func TestStoreHandlerList(t *testing.T) {
+	rr := httptest.NewRecorder()
+	store := store2.NewStoreInmemoryService("")
+
+	Store(store).ServeHTTP(rr, newListRequest(t))
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+}
 func TestStoreHandlerGetNonExisting(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
@@ -53,7 +66,7 @@ func TestStoreHandlerGet(t *testing.T) {
 	store := store2.NewStoreInmemoryService("")
 
 	requestPost := storeRequestPost{
-		Content: []byte("CONTENT"),
+		Content: "CONTENT",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
 	if status := rr.Code; status != http.StatusOK {
@@ -90,7 +103,7 @@ func TestStoreHandlerDelete(t *testing.T) {
 	store := store2.NewStoreInmemoryService("")
 
 	requestPost := storeRequestPost{
-		Content: []byte("CONTENT"),
+		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
 	if status := rr.Code; status != http.StatusOK {
@@ -109,7 +122,7 @@ func TestStoreHandlerPost(t *testing.T) {
 	store := store2.NewStoreInmemoryService("")
 
 	requestPost := storeRequestPost{
-		Content: []byte("CONTENT"),
+		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
 	if status := rr.Code; status != http.StatusOK {
@@ -122,7 +135,7 @@ func TestStoreHandlerPostOnExistingElement(t *testing.T) {
 	store := store2.NewStoreInmemoryService("")
 
 	requestPost := storeRequestPost{
-		Content: []byte("CONTENT"),
+		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
 	if status := rr.Code; status != http.StatusOK {
@@ -141,7 +154,7 @@ func TestStoreHandlerPutOnNonExistingElement(t *testing.T) {
 	store := store2.NewStoreInmemoryService("")
 
 	requestPost := storeRequestPost{
-		Content: []byte("CONTENT"),
+		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPutRequest(t, requestPost))
 	if status := rr.Code; status != http.StatusBadRequest {
@@ -154,7 +167,7 @@ func TestStoreHandlerPut(t *testing.T) {
 	store := store2.NewStoreInmemoryService("")
 
 	requestPost := storeRequestPost{
-		Content: []byte("CONTENT"),
+		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
 	if status := rr.Code; status != http.StatusOK {

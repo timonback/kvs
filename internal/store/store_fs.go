@@ -4,18 +4,21 @@ import (
 	"encoding/base64"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 type FilesystemService struct {
-	pathPrefix string
+	folder     string
+	filePrefix string
 }
 
 /**
 Store implementation which uses the filesystem for persistent storage
 */
-func NewStoreFilesystemService(pathPrefix string) Service {
+func NewStoreFilesystemService(folder string, filePrefix string) Service {
 	return &FilesystemService{
-		pathPrefix: pathPrefix,
+		folder:     folder,
+		filePrefix: filePrefix,
 	}
 }
 
@@ -23,10 +26,35 @@ func (s *FilesystemService) Name() string {
 	return "filesystem"
 }
 
-func (s *FilesystemService) pathToFilename(path Path) string {
-	wd, _ := os.Getwd()
+func (s *FilesystemService) Paths() []Path {
+	files, _ := ioutil.ReadDir(s.folder)
 
-	return wd + "/" + s.pathPrefix + "_fs_" + base64.StdEncoding.EncodeToString([]byte(path))
+	keys := make([]Path, 0, len(files))
+	for _, f := range files {
+		if !f.IsDir() {
+			key := s.filenameToPath(f)
+			if key != "" {
+				keys = append(keys, key)
+			}
+		}
+	}
+
+	return keys
+}
+
+func (s *FilesystemService) filenameToPath(file os.FileInfo) Path {
+	prefix := s.filePrefix + "_fs_"
+	if strings.HasPrefix(file.Name(), prefix) {
+		base64Name := file.Name()[len(prefix):]
+		key, err := base64.StdEncoding.DecodeString(base64Name)
+		if err == nil {
+			return Path(key)
+		}
+	}
+	return ""
+}
+func (s *FilesystemService) pathToFilename(path Path) string {
+	return s.folder + "/" + s.filePrefix + "_fs_" + base64.StdEncoding.EncodeToString([]byte(path))
 }
 
 func (s *FilesystemService) fileExists(path Path) bool {
@@ -40,7 +68,7 @@ func (s *FilesystemService) Read(path Path) (Item, error) {
 		return Item{}, NotFoundError
 	}
 	return Item{
-		Content: content,
+		Content: string(content),
 	}, nil
 }
 
@@ -48,14 +76,14 @@ func (s *FilesystemService) Create(path Path, item Item) error {
 	if s.fileExists(path) {
 		return DuplicateKeyError
 	}
-	return ioutil.WriteFile(s.pathToFilename(path), item.Content, 0744)
+	return ioutil.WriteFile(s.pathToFilename(path), []byte(item.Content), 0744)
 }
 
 func (s *FilesystemService) Update(path Path, item Item) error {
 	if !s.fileExists(path) {
 		return NotFoundError
 	}
-	return ioutil.WriteFile(s.pathToFilename(path), item.Content, 0744)
+	return ioutil.WriteFile(s.pathToFilename(path), []byte(item.Content), 0744)
 }
 
 func (s *FilesystemService) Delete(path Path) error {

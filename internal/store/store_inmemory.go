@@ -19,6 +19,14 @@ func (s *InmemoryService) Name() string {
 	return "inmemory" + s.id
 }
 
+func (s *InmemoryService) Paths() []Path {
+	keys := make([]Path, 0, len(s.store))
+	for k := range s.store {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
 func (s *InmemoryService) Read(path Path) (Item, error) {
 	if _, ok := s.store[path]; ok != true {
 		return Item{}, NotFoundError

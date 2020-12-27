@@ -1,6 +1,7 @@
 package store
 
 import (
+	"os"
 	"testing"
 )
 
@@ -8,20 +9,23 @@ var (
 	key  = "long_key_name/with_sub_folder/and/weird/symbols/!@#$%^&*()_=-+{}[]|\\';:,.<>?/keyName"
 	path = Path(key)
 	item = Item{
-		Content: []byte("content"),
+		Content: "content",
 	}
 )
 
 func allStores() []Service {
+	pwd, _ := os.Getwd()
+
 	inmemory1 := NewStoreInmemoryService("1")
 	inmemory2 := NewStoreInmemoryService("2")
 	inmemory3 := NewStoreInmemoryService("3")
 	inmemory4 := NewStoreInmemoryService("4")
 	inmemory5 := NewStoreInmemoryService("5")
-	filesystem1 := NewStoreFilesystemService("")
-	filesystem2 := NewStoreFilesystemService("1_")
+	filesystem1 := NewStoreFilesystemService(pwd, "1")
+	filesystem2 := NewStoreFilesystemService(pwd, "2")
 	replica := NewStoreReplicaService(inmemory1, inmemory2, inmemory3, inmemory4, inmemory5)
 	replica2 := NewStoreReplicaService(filesystem1, filesystem2)
+
 	return []Service{inmemory1, filesystem1, replica, replica2}
 }
 

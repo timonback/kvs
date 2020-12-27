@@ -6,11 +6,12 @@ type Path string
 
 type Item struct {
 	id      string
-	Content []byte
+	Content string
 }
 
 type Service interface {
 	Name() string
+	Paths() []Path
 	Read(path Path) (Item, error)
 	Create(path Path, item Item) error
 	Update(path Path, item Item) error

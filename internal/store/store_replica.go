@@ -31,6 +31,10 @@ func (s *ReplicaService) Name() string {
 	return name
 }
 
+func (s *ReplicaService) Paths() []Path {
+	return s.replicas[0].Paths()
+}
+
 func (s *ReplicaService) Read(path Path) (Item, error) {
 	return s.replicas[0].Read(path)
 }

@@ -18,8 +18,8 @@ func ParseServerArguments() Server {
 	arguments.Stop = make(chan os.Signal, 1)
 
 	storeMode := "inmemory"
-	flag.StringVar(&arguments.ListenAddr, "listen-addr", ":80", "server listen address")
-	flag.StringVar(&storeMode, "store", "inmemory", "store mode. Can be inmemory, filesystem")
+	flag.StringVar(&arguments.ListenAddr, "listen-addr", ":8080", "server listen address")
+	flag.StringVar(&storeMode, "store", "filesystem", "store mode. Can be inmemory, filesystem")
 	flag.Parse()
 
 	switch storeMode {
@@ -27,7 +27,10 @@ func ParseServerArguments() Server {
 		arguments.Store = store.NewStoreInmemoryService("")
 		break
 	case "filesystem":
-		arguments.Store = store.NewStoreFilesystemService("fs_")
+		pwd, _ := os.Getwd()
+		folder := pwd + "/data"
+		os.MkdirAll(folder, 0755)
+		arguments.Store = store.NewStoreFilesystemService(folder, "")
 		break
 	default:
 		internal.Logger.Println("Invalid parameter for flag store")

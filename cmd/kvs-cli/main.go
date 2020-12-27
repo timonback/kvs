@@ -14,9 +14,29 @@ func main() {
 
 	arguments := arguments.ParseCliArguments()
 
-	getItem(arguments)
 	postItem(arguments)
 	getItem(arguments)
+
+	listItem(arguments)
+}
+
+func listItem(arguments arguments.Cli) {
+	resp, err := http.Get(arguments.Protocol + arguments.ListenAddr + "/api/store")
+	if err != nil {
+		internal.Logger.Fatal(err)
+	}
+
+	if resp != nil {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		internal.Logger.Println("LIST " + string(body))
+
+		resp.Body.Close()
+	} else {
+		internal.Logger.Println("No response")
+	}
 }
 
 func getItem(arguments arguments.Cli) {
@@ -30,7 +50,7 @@ func getItem(arguments arguments.Cli) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		internal.Logger.Println(string(body))
+		internal.Logger.Println("GET " + string(body))
 
 		resp.Body.Close()
 	} else {
