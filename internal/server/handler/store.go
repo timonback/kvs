@@ -9,14 +9,14 @@ import (
 )
 
 type storeRequestPost struct {
-	Content interface{} `json:"data"`
+	Content []byte `json:"data"`
 }
 
 type storeResponse struct{}
 
 type storeResponseGet struct {
-	Key     string      `json:"key"`
-	Content interface{} `json:"content"`
+	Key     string `json:"key"`
+	Content []byte `json:"content"`
 }
 
 func Store(store store2.Service) http.Handler {

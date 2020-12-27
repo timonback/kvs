@@ -10,6 +10,10 @@ func NewStoreInmemoryService() Service {
 	}
 }
 
+func (s *InmemoryService) Name() string {
+	return "inmemory"
+}
+
 func (s *InmemoryService) Read(path Path) (Item, error) {
 	if _, ok := s.store[path]; ok != true {
 		return Item{}, NotFoundError
