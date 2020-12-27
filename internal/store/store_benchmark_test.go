@@ -13,7 +13,7 @@ var (
 )
 
 func allStores() []Service {
-	return []Service{NewStoreInmemoryService(), NewStoreFilesystemService()}
+	return []Service{NewStoreInmemoryService(), NewStoreFilesystemService("")}
 }
 
 func BenchmarkStoresGet(b *testing.B) {
