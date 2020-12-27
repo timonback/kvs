@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	key  = "key"
+	key  = "long_key_name/with_sub_folder/and/weird/symbols/!@#$%^&*()_=-+{}[]|\\';:,.<>?/keyName"
 	path = Path(key)
 	item = Item{
 		Content: []byte("content"),
@@ -63,7 +63,11 @@ func benchmarkStoreUpdate(store Service) func(b *testing.B) {
 
 func BenchmarkStoresUpdateError(b *testing.B) {
 	for _, store := range allStores() {
+		store.Delete(path)
+
 		b.Run(store.Name(), benchmarkStoreUpdateError(store))
+
+		store.Delete(path)
 	}
 }
 func benchmarkStoreUpdateError(store Service) func(b *testing.B) {
@@ -76,7 +80,11 @@ func benchmarkStoreUpdateError(store Service) func(b *testing.B) {
 
 func BenchmarkStoresDeleteError(b *testing.B) {
 	for _, store := range allStores() {
+		store.Delete(path)
+
 		b.Run(store.Name(), benchmarkStoreDeleteError(store))
+
+		store.Delete(path)
 	}
 }
 func benchmarkStoreDeleteError(store Service) func(b *testing.B) {

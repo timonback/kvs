@@ -1,9 +1,9 @@
 package store
 
 import (
+	"encoding/base64"
 	"io/ioutil"
 	"os"
-	"strings"
 )
 
 type FilesystemService struct {
@@ -48,14 +48,14 @@ func (s *FilesystemService) Create(path Path, item Item) error {
 	if s.fileExists(path) {
 		return DuplicateKeyError
 	}
-	return ioutil.WriteFile(s.pathToFilename(path), item.Content, 0)
+	return ioutil.WriteFile(s.pathToFilename(path), item.Content, 0744)
 }
 
 func (s *FilesystemService) Update(path Path, item Item) error {
 	if !s.fileExists(path) {
 		return NotFoundError
 	}
-	return ioutil.WriteFile(s.pathToFilename(path), item.Content, 0)
+	return ioutil.WriteFile(s.pathToFilename(path), item.Content, 0744)
 }
 
 func (s *FilesystemService) Delete(path Path) error {
