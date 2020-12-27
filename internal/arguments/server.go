@@ -24,7 +24,7 @@ func ParseServerArguments() Server {
 
 	switch storeMode {
 	case "inmemory":
-		arguments.Store = store.NewStoreInmemoryService()
+		arguments.Store = store.NewStoreInmemoryService("")
 		break
 	case "filesystem":
 		arguments.Store = store.NewStoreFilesystemService("fs_")

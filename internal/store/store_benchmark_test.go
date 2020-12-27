@@ -13,7 +13,16 @@ var (
 )
 
 func allStores() []Service {
-	return []Service{NewStoreInmemoryService(), NewStoreFilesystemService("")}
+	inmemory1 := NewStoreInmemoryService("1")
+	inmemory2 := NewStoreInmemoryService("2")
+	inmemory3 := NewStoreInmemoryService("3")
+	inmemory4 := NewStoreInmemoryService("4")
+	inmemory5 := NewStoreInmemoryService("5")
+	filesystem1 := NewStoreFilesystemService("")
+	filesystem2 := NewStoreFilesystemService("1_")
+	replica := NewStoreReplicaService(inmemory1, inmemory2, inmemory3, inmemory4, inmemory5)
+	replica2 := NewStoreReplicaService(filesystem1, filesystem2)
+	return []Service{inmemory1, filesystem1, replica, replica2}
 }
 
 func BenchmarkStoresGet(b *testing.B) {

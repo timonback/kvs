@@ -1,20 +1,22 @@
 package store
 
 type InmemoryService struct {
+	id    string
 	store map[Path]Item
 }
 
 /**
 Store implementation which is in-memory only
 */
-func NewStoreInmemoryService() Service {
+func NewStoreInmemoryService(id string) Service {
 	return &InmemoryService{
+		id:    id,
 		store: make(map[Path]Item),
 	}
 }
 
 func (s *InmemoryService) Name() string {
-	return "inmemory"
+	return "inmemory" + s.id
 }
 
 func (s *InmemoryService) Read(path Path) (Item, error) {

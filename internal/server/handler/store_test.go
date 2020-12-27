@@ -40,7 +40,7 @@ func newDeleteRequest(t *testing.T) *http.Request {
 
 func TestStoreHandlerGetNonExisting(t *testing.T) {
 	rr := httptest.NewRecorder()
-	store := store2.NewStoreInmemoryService()
+	store := store2.NewStoreInmemoryService("")
 
 	Store(store).ServeHTTP(rr, newGetRequest(t))
 	if status := rr.Code; status != http.StatusNoContent {
@@ -50,7 +50,7 @@ func TestStoreHandlerGetNonExisting(t *testing.T) {
 
 func TestStoreHandlerGet(t *testing.T) {
 	rr := httptest.NewRecorder()
-	store := store2.NewStoreInmemoryService()
+	store := store2.NewStoreInmemoryService("")
 
 	requestPost := storeRequestPost{
 		Content: []byte("CONTENT"),
@@ -77,7 +77,7 @@ func TestStoreHandlerGet(t *testing.T) {
 
 func TestStoreHandlerDeleteNonExisting(t *testing.T) {
 	rr := httptest.NewRecorder()
-	store := store2.NewStoreInmemoryService()
+	store := store2.NewStoreInmemoryService("")
 
 	Store(store).ServeHTTP(rr, newDeleteRequest(t))
 	if status := rr.Code; status != http.StatusBadRequest {
@@ -87,7 +87,7 @@ func TestStoreHandlerDeleteNonExisting(t *testing.T) {
 
 func TestStoreHandlerDelete(t *testing.T) {
 	rr := httptest.NewRecorder()
-	store := store2.NewStoreInmemoryService()
+	store := store2.NewStoreInmemoryService("")
 
 	requestPost := storeRequestPost{
 		Content: []byte("CONTENT"),
@@ -106,7 +106,7 @@ func TestStoreHandlerDelete(t *testing.T) {
 
 func TestStoreHandlerPost(t *testing.T) {
 	rr := httptest.NewRecorder()
-	store := store2.NewStoreInmemoryService()
+	store := store2.NewStoreInmemoryService("")
 
 	requestPost := storeRequestPost{
 		Content: []byte("CONTENT"),
@@ -119,7 +119,7 @@ func TestStoreHandlerPost(t *testing.T) {
 
 func TestStoreHandlerPostOnExistingElement(t *testing.T) {
 	rr := httptest.NewRecorder()
-	store := store2.NewStoreInmemoryService()
+	store := store2.NewStoreInmemoryService("")
 
 	requestPost := storeRequestPost{
 		Content: []byte("CONTENT"),
@@ -138,7 +138,7 @@ func TestStoreHandlerPostOnExistingElement(t *testing.T) {
 
 func TestStoreHandlerPutOnNonExistingElement(t *testing.T) {
 	rr := httptest.NewRecorder()
-	store := store2.NewStoreInmemoryService()
+	store := store2.NewStoreInmemoryService("")
 
 	requestPost := storeRequestPost{
 		Content: []byte("CONTENT"),
@@ -151,7 +151,7 @@ func TestStoreHandlerPutOnNonExistingElement(t *testing.T) {
 
 func TestStoreHandlerPut(t *testing.T) {
 	rr := httptest.NewRecorder()
-	store := store2.NewStoreInmemoryService()
+	store := store2.NewStoreInmemoryService("")
 
 	requestPost := storeRequestPost{
 		Content: []byte("CONTENT"),
