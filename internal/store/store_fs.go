@@ -31,7 +31,7 @@ func (s *FilesystemService) pathToFilename(path Path) string {
 
 func (s *FilesystemService) fileExists(path Path) bool {
 	_, err := os.Stat(s.pathToFilename(path))
-	return os.IsNotExist(err)
+	return !os.IsNotExist(err)
 }
 
 func (s *FilesystemService) Read(path Path) (Item, error) {
