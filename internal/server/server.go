@@ -40,6 +40,13 @@ func StartServer(arguments *arguments.Server, store store2.Service) {
 	done := make(chan bool)
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit, os.Kill)
+	go func() {
+		<-arguments.Stop
+		internal.Logger.Println("Received shutdown command...")
+		quit <- os.Interrupt
+		close(arguments.Stop)
+	}()
 
 	go func() {
 		<-quit
