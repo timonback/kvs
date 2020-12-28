@@ -22,7 +22,7 @@ func NewStoreFilesystemService(folder string, filePrefix string) Service {
 	}
 }
 
-func (s *FilesystemService) Name() string {
+func (s *FilesystemService) String() string {
 	return "filesystem"
 }
 

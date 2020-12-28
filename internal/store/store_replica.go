@@ -21,10 +21,10 @@ func NewStoreReplicaService(stores ...Service) Service {
 	}
 }
 
-func (s *ReplicaService) Name() string {
-	name := "replicas(" + s.replicas[0].Name()
+func (s *ReplicaService) String() string {
+	name := "replicas(" + s.replicas[0].String()
 	for _, replica := range s.replicas[1:] {
-		name += "," + replica.Name()
+		name += "," + replica.String()
 	}
 	name += ")"
 

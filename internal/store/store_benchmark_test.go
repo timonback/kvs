@@ -34,7 +34,7 @@ func BenchmarkStoresGet(b *testing.B) {
 		store.Delete(path)
 		store.Create(path, item)
 
-		b.Run(store.Name(), benchmarkStoreGet(store))
+		b.Run(store.String(), benchmarkStoreGet(store))
 
 		store.Delete(path)
 	}
@@ -52,7 +52,7 @@ func BenchmarkStoresUpdate(b *testing.B) {
 		store.Delete(path)
 		store.Create(path, item)
 
-		b.Run(store.Name(), benchmarkStoreUpdate(store))
+		b.Run(store.String(), benchmarkStoreUpdate(store))
 
 		store.Delete(path)
 	}
@@ -69,7 +69,7 @@ func BenchmarkStoresUpdateError(b *testing.B) {
 	for _, store := range allStores() {
 		store.Delete(path)
 
-		b.Run(store.Name(), benchmarkStoreUpdateError(store))
+		b.Run(store.String(), benchmarkStoreUpdateError(store))
 
 		store.Delete(path)
 	}
@@ -86,7 +86,7 @@ func BenchmarkStoresDeleteError(b *testing.B) {
 	for _, store := range allStores() {
 		store.Delete(path)
 
-		b.Run(store.Name(), benchmarkStoreDeleteError(store))
+		b.Run(store.String(), benchmarkStoreDeleteError(store))
 
 		store.Delete(path)
 	}

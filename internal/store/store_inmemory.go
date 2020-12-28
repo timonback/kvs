@@ -15,7 +15,7 @@ func NewStoreInmemoryService(id string) Service {
 	}
 }
 
-func (s *InmemoryService) Name() string {
+func (s *InmemoryService) String() string {
 	return "inmemory" + s.id
 }
 
