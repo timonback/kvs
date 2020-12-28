@@ -4,7 +4,7 @@ HOST="localhost"
 PORT="4567"
 HEALTH_URL="http://${HOST}:${PORT}/healthz"
 
-./kvs -listen-addr "${HOST}:${PORT}" &
+./kvs -listen-port "${PORT}" &
 
 echo "Wait for server to become ready..."
 timeout --foreground -s TERM 5 bash -c ' \

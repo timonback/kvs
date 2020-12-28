@@ -28,7 +28,7 @@ func StartServer(arguments *arguments.Server) {
 	}
 
 	server := &http.Server{
-		Addr:         arguments.ListenAddr,
+		Addr:         arguments.ListenPort,
 		Handler:      filter.Tracing(nextRequestID)(filter.Logging(internal.Logger)(router)),
 		ErrorLog:     internal.Logger,
 		ReadTimeout:  5 * time.Second,
@@ -62,10 +62,10 @@ func StartServer(arguments *arguments.Server) {
 		close(done)
 	}()
 
-	internal.Logger.Println("Server is ready to handle requests at", arguments.ListenAddr)
+	internal.Logger.Println("Server is ready to handle requests at", arguments.ListenPort)
 	handler.SetHealthy(handler.HEALTHY)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		internal.Logger.Fatalf("Could not listen on %s: %v\n", arguments.ListenAddr, err)
+		internal.Logger.Fatalf("Could not listen on %s: %v\n", arguments.ListenPort, err)
 	}
 
 	<-done

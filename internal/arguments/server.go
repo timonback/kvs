@@ -8,17 +8,22 @@ import (
 )
 
 type Server struct {
-	ListenAddr string
+	ListenPort string
 	Stop       chan os.Signal
-	Store      store.Service
+
+	Peers chan string
+
+	Store store.Service
 }
 
 func ParseServerArguments() Server {
 	arguments := Server{}
+
 	arguments.Stop = make(chan os.Signal, 1)
+	arguments.Peers = make(chan string, 1)
 
 	storeMode := "inmemory"
-	flag.StringVar(&arguments.ListenAddr, "listen-addr", ":8080", "server listen address")
+	flag.StringVar(&arguments.ListenPort, "listen-port", "8080", "server listen port")
 	flag.StringVar(&storeMode, "store", "filesystem", "store mode. Can be inmemory, filesystem")
 	flag.Parse()
 
