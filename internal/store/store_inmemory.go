@@ -50,6 +50,11 @@ func (s *InmemoryService) Update(path Path, item Item) error {
 	return nil
 }
 
+func (s *InmemoryService) Write(path Path, item Item) error {
+	s.store[path] = item
+	return nil
+}
+
 func (s *InmemoryService) Delete(path Path) error {
 	if _, ok := s.store[path]; ok != true {
 		return NotFoundError

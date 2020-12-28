@@ -37,6 +37,10 @@ type Service interface {
 	 */
 	Update(path Path, item Item) error
 	/**
+	Writes an item, regardless of an existing item
+	 */
+	Write(path Path, item Item) error
+	/**
 	Delete an item
 	Fails when no item exists at the path
 	 */

@@ -86,6 +86,10 @@ func (s *FilesystemService) Update(path Path, item Item) error {
 	return ioutil.WriteFile(s.pathToFilename(path), []byte(item.Content), 0744)
 }
 
+func (s *FilesystemService) Write(path Path, item Item) error {
+	return ioutil.WriteFile(s.pathToFilename(path), []byte(item.Content), 0744)
+}
+
 func (s *FilesystemService) Delete(path Path) error {
 	if !s.fileExists(path) {
 		return NotFoundError

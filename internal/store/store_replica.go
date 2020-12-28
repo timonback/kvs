@@ -71,6 +71,22 @@ func (s *ReplicaService) Update(path Path, item Item) error {
 	return err
 }
 
+func (s *ReplicaService) Write(path Path, item Item) error {
+	err := s.replicas[0].Write(path, item)
+	if err == nil {
+		wg := sync.WaitGroup{}
+		for _, replica := range s.replicas[1:] {
+			wg.Add(1)
+			go func(rep Service) {
+				rep.Write(path, item)
+				wg.Done()
+			}(replica)
+		}
+		wg.Wait()
+	}
+	return err
+}
+
 func (s *ReplicaService) Delete(path Path) error {
 	err := s.replicas[0].Delete(path)
 	if err == nil {
