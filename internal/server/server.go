@@ -21,6 +21,7 @@ func StartServer(arguments *arguments.Server) {
 	router.Handle("/healthz", handler.Healthz())
 	router.Handle("/hello", handler.Index())
 	router.Handle(context2.HandlerPathStore, handler.Store(arguments.Store))
+	router.Handle(context2.HandlerPathInternalId, handler.InternalId())
 	router.Handle("/ui/", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
 
 	nextRequestID := func() string {
@@ -28,7 +29,7 @@ func StartServer(arguments *arguments.Server) {
 	}
 
 	server := &http.Server{
-		Addr:         arguments.ListenPort,
+		Addr:         ":" + arguments.ListenPort,
 		Handler:      filter.Tracing(nextRequestID)(filter.Logging(internal.Logger)(router)),
 		ErrorLog:     internal.Logger,
 		ReadTimeout:  5 * time.Second,
@@ -61,6 +62,8 @@ func StartServer(arguments *arguments.Server) {
 		}
 		close(done)
 	}()
+
+	StartServerDiscovery(arguments)
 
 	internal.Logger.Println("Server is ready to handle requests at", arguments.ListenPort)
 	handler.SetHealthy(handler.HEALTHY)

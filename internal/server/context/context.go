@@ -5,5 +5,10 @@ type key int
 const (
 	RequestIDKey key = 0
 
-	HandlerPathStore = "/api/store/"
+	HandlerPathApi        = "/api"
+	HandlerPathStore      = HandlerPathApi + "/store/"
+	HandlerPathInternal   = HandlerPathApi + "/internal"
+	HandlerPathInternalId = HandlerPathInternal + "/id"
+
+	DiscoveryIdLength = 64
 )

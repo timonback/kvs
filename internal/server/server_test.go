@@ -13,7 +13,7 @@ func TestStartServer(t *testing.T) {
 	internal.InitLogger(false)
 
 	args := arguments.Server{
-		ListenAddr: ":9999",
+		ListenPort: "9999",
 		Stop:       make(chan os.Signal, 1),
 		Store:      store2.NewStoreInmemoryService(""),
 	}

@@ -20,7 +20,7 @@ func ParseServerArguments() Server {
 	arguments := Server{}
 
 	arguments.Stop = make(chan os.Signal, 1)
-	arguments.Peers = make(chan string, 1)
+	arguments.Peers = make(chan string, 10)
 
 	storeMode := "inmemory"
 	flag.StringVar(&arguments.ListenPort, "listen-port", "8080", "server listen port")
