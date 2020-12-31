@@ -1,9 +1,12 @@
 package context
 
+import "github.com/timonback/keyvaluestore/internal"
+
 type key int
 
 const (
-	RequestIDKey key = 0
+	RequestIDKey    key = 0
+	ApplicationJson     = "application/json"
 
 	HandlerPathApi = "/api"
 
@@ -11,7 +14,16 @@ const (
 
 	HandlerPathInternal                = HandlerPathApi + "/internal"
 	HandlerPathInternalId              = HandlerPathInternal + "/id"
-	HandlerPathInternalReplicaElection = HandlerPathInternal + "/replica/election"
+	HandlerPathInternalReplica         = HandlerPathInternal + "/replica"
+	HandlerPathInternalReplicaElection = HandlerPathInternalReplica + "/leader"
 
 	DiscoveryIdLength = 64
 )
+
+var (
+	instanceId = internal.RandomString(DiscoveryIdLength)
+)
+
+func GetInstanceId() string {
+	return instanceId
+}

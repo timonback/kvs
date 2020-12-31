@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"github.com/timonback/keyvaluestore/internal/server/context"
+	"github.com/timonback/keyvaluestore/internal/server/handler/pojo"
 	store2 "github.com/timonback/keyvaluestore/internal/store"
 	"io"
 	"net/http"
@@ -28,12 +29,12 @@ func newGetRequest(t *testing.T) *http.Request {
 	return newRequest(t, "GET", "key", nil)
 }
 
-func newPostRequest(t *testing.T, request storeRequestPost) *http.Request {
+func newPostRequest(t *testing.T, request pojo.StoreRequestPost) *http.Request {
 	requestJson, _ := json.Marshal(request)
 	return newRequest(t, "POST", "key", strings.NewReader(string(requestJson)))
 }
 
-func newPutRequest(t *testing.T, request storeRequestPost) *http.Request {
+func newPutRequest(t *testing.T, request pojo.StoreRequestPost) *http.Request {
 	requestJson, _ := json.Marshal(request)
 	return newRequest(t, "PUT", "key", strings.NewReader(string(requestJson)))
 }
@@ -65,7 +66,7 @@ func TestStoreHandlerGet(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
 
-	requestPost := storeRequestPost{
+	requestPost := pojo.StoreRequestPost{
 		Content: "CONTENT",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
@@ -102,7 +103,7 @@ func TestStoreHandlerDelete(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
 
-	requestPost := storeRequestPost{
+	requestPost := pojo.StoreRequestPost{
 		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
@@ -121,7 +122,7 @@ func TestStoreHandlerPost(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
 
-	requestPost := storeRequestPost{
+	requestPost := pojo.StoreRequestPost{
 		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
@@ -134,7 +135,7 @@ func TestStoreHandlerPostOnExistingElement(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
 
-	requestPost := storeRequestPost{
+	requestPost := pojo.StoreRequestPost{
 		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
@@ -153,7 +154,7 @@ func TestStoreHandlerPutOnNonExistingElement(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
 
-	requestPost := storeRequestPost{
+	requestPost := pojo.StoreRequestPost{
 		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPutRequest(t, requestPost))
@@ -166,7 +167,7 @@ func TestStoreHandlerPut(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
 
-	requestPost := storeRequestPost{
+	requestPost := pojo.StoreRequestPost{
 		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))

@@ -10,5 +10,5 @@ var (
 )
 
 func InitLogger(prefix string) {
-	Logger = log.New(os.Stdout, prefix, log.LstdFlags)
+	Logger = log.New(os.Stdout, prefix+" ", log.LstdFlags)
 }

@@ -4,13 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/timonback/keyvaluestore/internal/server/context"
+	"github.com/timonback/keyvaluestore/internal/server/handler/pojo"
 	store2 "github.com/timonback/keyvaluestore/internal/store"
 	"net/http"
 )
-
-type storeRequestPost struct {
-	Content string `json:"data"`
-}
 
 type storeResponse struct{}
 
@@ -52,7 +49,7 @@ func Store(store store2.Service) http.Handler {
 			}
 			message, _ = json.Marshal(response)
 		} else if r.Method == "POST" || r.Method == "PUT" {
-			itemRequest := storeRequestPost{}
+			itemRequest := pojo.StoreRequestPost{}
 			if err := MapBodyToStruct(r, &itemRequest); err != nil {
 				HandleError(w, r, http.StatusBadRequest, err, params)
 				return

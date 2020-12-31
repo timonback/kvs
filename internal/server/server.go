@@ -8,9 +8,11 @@ import (
 	context2 "github.com/timonback/keyvaluestore/internal/server/context"
 	"github.com/timonback/keyvaluestore/internal/server/filter"
 	"github.com/timonback/keyvaluestore/internal/server/handler"
+	"github.com/timonback/keyvaluestore/internal/server/replica"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 )
 
@@ -22,6 +24,7 @@ func StartServer(arguments *arguments.Server) {
 	router.Handle("/hello", handler.Index())
 	router.Handle(context2.HandlerPathStore, handler.Store(arguments.Store))
 	router.Handle(context2.HandlerPathInternalId, handler.InternalId())
+	router.Handle(context2.HandlerPathInternalReplica, handler.Peers())
 	router.Handle(context2.HandlerPathInternalReplicaElection, handler.LeaderElection())
 	router.Handle("/ui/", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
 
@@ -30,7 +33,7 @@ func StartServer(arguments *arguments.Server) {
 	}
 
 	server := &http.Server{
-		Addr:         ":" + arguments.ListenPort,
+		Addr:         ":" + strconv.Itoa(arguments.ListenPort),
 		Handler:      filter.Tracing(nextRequestID)(filter.Logging(internal.Logger, router)),
 		ErrorLog:     internal.Logger,
 		ReadTimeout:  5 * time.Second,
@@ -64,12 +67,12 @@ func StartServer(arguments *arguments.Server) {
 		close(done)
 	}()
 
-	StartServerDiscovery(arguments)
+	replica.StartServerDiscovery(arguments.ListenPort, arguments.DiscoveredPeers)
 
 	internal.Logger.Println("Server is ready to handle requests at", arguments.ListenPort)
 	handler.SetHealthy(handler.HEALTHY)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		internal.Logger.Fatalf("Could not listen on %s: %v\n", arguments.ListenPort, err)
+		internal.Logger.Fatalf("Could not listen on %d: %v\n", arguments.ListenPort, err)
 	}
 
 	<-done

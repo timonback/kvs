@@ -25,15 +25,21 @@ func (lrw *loggingResponseWriter) WriteHeader(code int) {
 func Logging(Logger *log.Logger, wrappedHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestID, ok := r.Context().Value(context2.RequestIDKey).(string)
-		if !ok {
-			requestID = "unknown"
+
+		logRequest := r.URL.Path != context2.HandlerPathInternalId
+		if logRequest {
+			if !ok {
+				requestID = "unknown"
+			}
+			Logger.Println("-->", requestID, r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent())
 		}
-		Logger.Println("-->", requestID, r.Method, r.URL.Path, r.RemoteAddr, r.UserAgent())
 
 		lrw := NewLoggingResponseWriter(w)
 		wrappedHandler.ServeHTTP(lrw, r)
 
-		statusCode := lrw.statusCode
-		Logger.Println("<--", requestID, r.Method, r.URL.Path, statusCode, http.StatusText(statusCode))
+		if logRequest {
+			statusCode := lrw.statusCode
+			Logger.Println("<--", requestID, r.Method, r.URL.Path, statusCode, http.StatusText(statusCode))
+		}
 	})
 }
