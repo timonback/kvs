@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/timonback/keyvaluestore/internal"
 	"github.com/timonback/keyvaluestore/internal/server/context"
 	"net/http"
@@ -14,6 +13,10 @@ var (
 func InternalId() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, id)
+		w.Write([]byte(id))
 	})
+}
+
+func GetInternalId() string {
+	return id
 }

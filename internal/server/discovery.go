@@ -11,6 +11,8 @@ import (
 )
 
 func StartServerDiscovery(arguments *arguments.Server) {
+	internal.Logger.Println("Discovery is starting...")
+
 	go peerdiscovery.Discover(peerdiscovery.Settings{
 		Limit:     -1,
 		TimeLimit: -1,

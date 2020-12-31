@@ -22,6 +22,7 @@ func StartServer(arguments *arguments.Server) {
 	router.Handle("/hello", handler.Index())
 	router.Handle(context2.HandlerPathStore, handler.Store(arguments.Store))
 	router.Handle(context2.HandlerPathInternalId, handler.InternalId())
+	router.Handle(context2.HandlerPathInternalReplicaElection, handler.LeaderElection())
 	router.Handle("/ui/", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
 
 	nextRequestID := func() string {
