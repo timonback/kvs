@@ -10,7 +10,7 @@ import (
 )
 
 func TestStartServer(t *testing.T) {
-	internal.InitLogger(false)
+	internal.InitLogger("test")
 
 	args := arguments.Server{
 		ListenPort: "9999",

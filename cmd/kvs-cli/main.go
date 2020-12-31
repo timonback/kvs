@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	internal.InitLogger(true)
+	internal.InitLogger("cli")
 
 	arguments := arguments.ParseCliArguments()
 

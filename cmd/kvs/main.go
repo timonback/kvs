@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	internal.InitLogger(false)
+	internal.InitLogger("server")
 
 	arguments := arguments.ParseServerArguments()
 

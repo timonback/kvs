@@ -9,10 +9,6 @@ var (
 	Logger *log.Logger
 )
 
-func InitLogger(isCli bool) {
-	if isCli {
-		Logger = log.New(os.Stdout, "cli: ", log.LstdFlags)
-	} else {
-		Logger = log.New(os.Stdout, "server: ", log.LstdFlags)
-	}
+func InitLogger(prefix string) {
+	Logger = log.New(os.Stdout, prefix, log.LstdFlags)
 }
