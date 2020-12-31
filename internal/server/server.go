@@ -30,7 +30,7 @@ func StartServer(arguments *arguments.Server) {
 
 	server := &http.Server{
 		Addr:         ":" + arguments.ListenPort,
-		Handler:      filter.Tracing(nextRequestID)(filter.Logging(internal.Logger)(router)),
+		Handler:      filter.Tracing(nextRequestID)(filter.Logging(internal.Logger, router)),
 		ErrorLog:     internal.Logger,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
