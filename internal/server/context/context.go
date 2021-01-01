@@ -16,6 +16,9 @@ const (
 	HandlerPathInternalId              = HandlerPathInternal + "/id"
 	HandlerPathInternalReplica         = HandlerPathInternal + "/replica"
 	HandlerPathInternalReplicaElection = HandlerPathInternalReplica + "/leader"
+	HandlerPathInternalReplicaSync     = HandlerPathInternalReplica + "/sync"
+
+	QueryParameterForce = "force"
 
 	DiscoveryIdLength = 64
 )

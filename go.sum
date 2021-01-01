@@ -1,5 +1,7 @@
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/kinbiko/jsonassert v1.0.1 h1:8gdLmUaPWuxk2TzQSofKRqatFH6zwTF6AsUH4bugJYY=
+github.com/kinbiko/jsonassert v1.0.1/go.mod h1:QRwBwiAsrcJpjw+L+Q4WS8psLxuUY+HylVZS/4j74TM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/schollz/peerdiscovery v1.6.2 h1:EE1mnCuiQXbp8sG0z0qx9xkuU2Eho6LgcwD3LfnNIlQ=

@@ -1,14 +1,15 @@
 package store
 
 import (
+	"github.com/timonback/keyvaluestore/internal/store/model"
 	"os"
 	"testing"
 )
 
 var (
 	key  = "long_key_name/with_sub_folder/and/weird/symbols/!@#$%^&*()_=-+{}[]|\\';:,.<>?/keyName"
-	path = Path(key)
-	item = Item{
+	path = model.Path(key)
+	item = model.Item{
 		Content: "content",
 	}
 )

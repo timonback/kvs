@@ -1,13 +1,9 @@
 package store
 
-import "errors"
-
-type Path string
-
-type Item struct {
-	id      string
-	Content string
-}
+import (
+	"errors"
+	"github.com/timonback/keyvaluestore/internal/store/model"
+)
 
 /**
 Interface to various store implementations
@@ -21,30 +17,30 @@ type Service interface {
 	Get all current items in the store
 	Does not guarantee a refreshed look in case the store was changed externally
 	*/
-	Paths() []Path
+	Paths() []model.Path
 	/**
 	Read an item
 	*/
-	Read(path Path) (Item, error)
+	Read(path model.Path) (model.Item, error)
 	/**
 	Create a new item in the store
 	Fails when an item already exists at the path
 	*/
-	Create(path Path, item Item) error
+	Create(path model.Path, item model.Item) error
 	/**
 	Updates an existing item
 	Fails when no item exists at the path
 	*/
-	Update(path Path, item Item) error
+	Update(path model.Path, item model.Item) error
 	/**
 	Writes an item, regardless of an existing item
 	*/
-	Write(path Path, item Item) error
+	Write(path model.Path, item model.Item) error
 	/**
 	Delete an item
 	Fails when no item exists at the path
 	*/
-	Delete(path Path) error
+	Delete(path model.Path) error
 }
 
 var (

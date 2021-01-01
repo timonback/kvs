@@ -25,7 +25,7 @@ type Leader struct {
 
 var (
 	peers    = make(map[string]Peer)
-	leaderId = context.GetInstanceId()
+	leaderId = ""
 )
 
 func StartServerDiscovery(listenPort int, discoveredPeers chan string) {
@@ -75,23 +75,34 @@ func goCheckPeersHealth() {
 		for {
 			select {
 			case <-ticker.C:
-				lowestInstanceId := "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
-				for _, peer := range peers {
-					if available, id := IsPeerAvailable(peer.Address); !available || string(id) != peer.Id {
-						internal.Logger.Printf("Removing unavailable/restarted peer %v", peer)
-						delete(peers, peer.Address)
-					} else if peer.Id < lowestInstanceId {
-						// TODO: Improve leader election
-						lowestInstanceId = peer.Id
-						leaderId = lowestInstanceId
-					}
-				}
+				leadershipCheck()
 			case <-quit:
 				ticker.Stop()
 				return
 			}
 		}
 	}()
+}
+
+func leadershipCheck() {
+	newLeaderId := "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+	for _, peer := range peers {
+		if available, id := IsPeerAvailable(peer.Address); !available || string(id) != peer.Id {
+			internal.Logger.Printf("Removing unavailable/restarted peer %v", peer)
+			delete(peers, peer.Address)
+		} else if peer.Id < newLeaderId {
+			// TODO: Improve leader election
+			newLeaderId = peer.Id
+		}
+	}
+	if leaderId != newLeaderId {
+		if newLeaderId != context.GetInstanceId() {
+			internal.Logger.Printf("Leadership lost")
+		} else {
+			internal.Logger.Println("Leadership gained")
+		}
+	}
+	leaderId = newLeaderId
 }
 
 func IsPeerAvailable(peerAddress string) (bool, []byte) {
@@ -105,12 +116,14 @@ func IsPeerAvailable(peerAddress string) (bool, []byte) {
 	return false, nil
 }
 
-func GetOnlinePeers() []Peer {
+func GetOnlinePeers(includeMyself bool) []Peer {
 	p := make([]Peer, 0, len(peers))
 
 	for _, peer := range peers {
 		if peer.IsOnline {
-			p = append(p, peer)
+			if includeMyself || peer.Id != context.GetInstanceId() {
+				p = append(p, peer)
+			}
 		}
 	}
 

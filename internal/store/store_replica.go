@@ -1,6 +1,9 @@
 package store
 
-import "sync"
+import (
+	"github.com/timonback/keyvaluestore/internal/store/model"
+	"sync"
+)
 
 type ReplicaService struct {
 	replicas []Service
@@ -31,15 +34,15 @@ func (s *ReplicaService) String() string {
 	return name
 }
 
-func (s *ReplicaService) Paths() []Path {
+func (s *ReplicaService) Paths() []model.Path {
 	return s.replicas[0].Paths()
 }
 
-func (s *ReplicaService) Read(path Path) (Item, error) {
+func (s *ReplicaService) Read(path model.Path) (model.Item, error) {
 	return s.replicas[0].Read(path)
 }
 
-func (s *ReplicaService) Create(path Path, item Item) error {
+func (s *ReplicaService) Create(path model.Path, item model.Item) error {
 	err := s.replicas[0].Create(path, item)
 	if err == nil {
 		wg := sync.WaitGroup{}
@@ -55,7 +58,7 @@ func (s *ReplicaService) Create(path Path, item Item) error {
 	return err
 }
 
-func (s *ReplicaService) Update(path Path, item Item) error {
+func (s *ReplicaService) Update(path model.Path, item model.Item) error {
 	err := s.replicas[0].Update(path, item)
 	if err == nil {
 		wg := sync.WaitGroup{}
@@ -71,7 +74,7 @@ func (s *ReplicaService) Update(path Path, item Item) error {
 	return err
 }
 
-func (s *ReplicaService) Write(path Path, item Item) error {
+func (s *ReplicaService) Write(path model.Path, item model.Item) error {
 	err := s.replicas[0].Write(path, item)
 	if err == nil {
 		wg := sync.WaitGroup{}
@@ -87,7 +90,7 @@ func (s *ReplicaService) Write(path Path, item Item) error {
 	return err
 }
 
-func (s *ReplicaService) Delete(path Path) error {
+func (s *ReplicaService) Delete(path model.Path) error {
 	err := s.replicas[0].Delete(path)
 	if err == nil {
 		wg := sync.WaitGroup{}

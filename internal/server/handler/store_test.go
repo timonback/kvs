@@ -2,8 +2,9 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/kinbiko/jsonassert"
 	"github.com/timonback/keyvaluestore/internal/server/context"
-	"github.com/timonback/keyvaluestore/internal/server/handler/pojo"
+	"github.com/timonback/keyvaluestore/internal/server/handler/model"
 	store2 "github.com/timonback/keyvaluestore/internal/store"
 	"io"
 	"net/http"
@@ -29,12 +30,12 @@ func newGetRequest(t *testing.T) *http.Request {
 	return newRequest(t, "GET", "key", nil)
 }
 
-func newPostRequest(t *testing.T, request pojo.StoreRequestPost) *http.Request {
+func newPostRequest(t *testing.T, request model.StoreRequestPost) *http.Request {
 	requestJson, _ := json.Marshal(request)
 	return newRequest(t, "POST", "key", strings.NewReader(string(requestJson)))
 }
 
-func newPutRequest(t *testing.T, request pojo.StoreRequestPost) *http.Request {
+func newPutRequest(t *testing.T, request model.StoreRequestPost) *http.Request {
 	requestJson, _ := json.Marshal(request)
 	return newRequest(t, "PUT", "key", strings.NewReader(string(requestJson)))
 }
@@ -66,7 +67,7 @@ func TestStoreHandlerGet(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
 
-	requestPost := pojo.StoreRequestPost{
+	requestPost := model.StoreRequestPost{
 		Content: "CONTENT",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
@@ -80,13 +81,11 @@ func TestStoreHandlerGet(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 
-	getResponse := storeResponseGet{
-		Key:     "key",
-		Content: requestPost.Content,
-	}
-	if body, _ := json.Marshal(getResponse); rr2.Body.String() != string(body) {
-		t.Errorf("response did not match: got %v want %v", rr2.Body.String(), string(body))
-	}
+	jsonassert.New(t).Assertf(rr2.Body.String(), `{
+"key": "%s",
+"content": "%s",
+"lastModified": "<<PRESENCE>>"
+}`, "key", requestPost.Content)
 }
 
 func TestStoreHandlerDeleteNonExisting(t *testing.T) {
@@ -103,7 +102,7 @@ func TestStoreHandlerDelete(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
 
-	requestPost := pojo.StoreRequestPost{
+	requestPost := model.StoreRequestPost{
 		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
@@ -122,7 +121,7 @@ func TestStoreHandlerPost(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
 
-	requestPost := pojo.StoreRequestPost{
+	requestPost := model.StoreRequestPost{
 		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
@@ -135,7 +134,7 @@ func TestStoreHandlerPostOnExistingElement(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
 
-	requestPost := pojo.StoreRequestPost{
+	requestPost := model.StoreRequestPost{
 		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))
@@ -154,7 +153,7 @@ func TestStoreHandlerPutOnNonExistingElement(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
 
-	requestPost := pojo.StoreRequestPost{
+	requestPost := model.StoreRequestPost{
 		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPutRequest(t, requestPost))
@@ -167,7 +166,7 @@ func TestStoreHandlerPut(t *testing.T) {
 	rr := httptest.NewRecorder()
 	store := store2.NewStoreInmemoryService("")
 
-	requestPost := pojo.StoreRequestPost{
+	requestPost := model.StoreRequestPost{
 		Content: "Content",
 	}
 	Store(store).ServeHTTP(rr, newPostRequest(t, requestPost))

@@ -4,20 +4,23 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/timonback/keyvaluestore/internal/server/context"
-	"github.com/timonback/keyvaluestore/internal/server/handler/pojo"
+	"github.com/timonback/keyvaluestore/internal/server/handler/model"
 	store2 "github.com/timonback/keyvaluestore/internal/store"
+	model2 "github.com/timonback/keyvaluestore/internal/store/model"
 	"net/http"
+	"time"
 )
 
 type storeResponse struct{}
 
 type storeReponseList struct {
-	Paths []store2.Path `json:"paths"`
+	Paths []model2.Path `json:"paths"`
 }
 
 type storeResponseGet struct {
-	Key     string `json:"key"`
-	Content string `json:"content"`
+	Key          string    `json:"key"`
+	Content      string    `json:"content"`
+	LastModified time.Time `json:"lastModified"`
 }
 
 func Store(store store2.Service) http.Handler {
@@ -38,30 +41,39 @@ func Store(store store2.Service) http.Handler {
 
 			message, _ = json.Marshal(response)
 		} else if r.Method == "GET" {
-			item, err := store.Read(store2.Path(storePath))
+			item, err := store.Read(model2.Path(storePath))
 			if err != nil {
 				HandleError(w, r, http.StatusNoContent, err, params)
 				return
 			}
 			response := storeResponseGet{
-				Key:     string(storePath),
-				Content: item.Content,
+				Key:          string(storePath),
+				Content:      item.Content,
+				LastModified: item.Time,
 			}
 			message, _ = json.Marshal(response)
 		} else if r.Method == "POST" || r.Method == "PUT" {
-			itemRequest := pojo.StoreRequestPost{}
+			itemRequest := model.StoreRequestPost{}
 			if err := MapBodyToStruct(r, &itemRequest); err != nil {
 				HandleError(w, r, http.StatusBadRequest, err, params)
 				return
 			}
-			item := store2.Item{Content: itemRequest.Content}
-			if r.Method == "POST" {
-				if err := store.Create(store2.Path(storePath), item); err != nil {
+			item := model2.Item{
+				Content: itemRequest.Content,
+				Time:    time.Now(),
+			}
+			if r.URL.Query().Get(context.QueryParameterForce) != "" {
+				if err := store.Write(model2.Path(storePath), item); err != nil {
+					HandleError(w, r, http.StatusBadRequest, err, params)
+					return
+				}
+			} else if r.Method == "POST" {
+				if err := store.Create(model2.Path(storePath), item); err != nil {
 					HandleError(w, r, http.StatusBadRequest, err, params)
 					return
 				}
 			} else if r.Method == "PUT" {
-				if err := store.Update(store2.Path(storePath), item); err != nil {
+				if err := store.Update(model2.Path(storePath), item); err != nil {
 					HandleError(w, r, http.StatusBadRequest, err, params)
 					return
 				}
@@ -70,7 +82,7 @@ func Store(store store2.Service) http.Handler {
 			}
 			message, _ = json.Marshal(storeResponse{})
 		} else if r.Method == "DELETE" {
-			if err := store.Delete(store2.Path(storePath)); err != nil {
+			if err := store.Delete(model2.Path(storePath)); err != nil {
 				HandleError(w, r, http.StatusBadRequest, err, params)
 				return
 			}

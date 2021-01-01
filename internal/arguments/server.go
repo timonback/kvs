@@ -13,7 +13,8 @@ type Server struct {
 
 	DiscoveredPeers chan string
 
-	Store store.Service
+	Store        store.Service
+	NetworkStore *store.NetworkService // possibly duplicated. Is type casting Store -> NetworkStore possible (currently in server.go)?
 }
 
 func ParseServerArguments() Server {
@@ -31,11 +32,22 @@ func ParseServerArguments() Server {
 	if *withFilesystemStore {
 		pwd, _ := os.Getwd()
 		folder := pwd + "/data"
-		os.MkdirAll(folder, 0755)
-		arguments.Store = store.NewStoreReplicaService(arguments.Store, store.NewStoreFilesystemService(folder, ""))
+		_ = os.MkdirAll(folder, 0755)
+		filesystemStore := store.NewStoreFilesystemService(folder, "")
+
+		// init in memory store with current content from filesystem
+		for _, path := range filesystemStore.Paths() {
+			item, err := filesystemStore.Read(path)
+			if err == nil {
+				arguments.Store.Write(path, item)
+			}
+		}
+
+		arguments.Store = store.NewStoreReplicaService(arguments.Store, filesystemStore)
 	}
 	if *withNetworkStore {
-		arguments.Store = store.NewStoreNetworkService(arguments.Store, replica.GetLeader)
+		arguments.NetworkStore = store.NewStoreNetworkService(arguments.Store, replica.GetLeader)
+		arguments.Store = arguments.NetworkStore
 	}
 
 	return arguments
