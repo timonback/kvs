@@ -18,7 +18,7 @@ func Store(store store2.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		storePath := r.URL.Path[len(context.HandlerPathStore):]
 		params := CreateErrorParameters(ErrorParameter{
-			key:   PARAMETER_PATH,
+			key:   ParameterPath,
 			value: storePath,
 		})
 
@@ -79,8 +79,7 @@ func Store(store store2.Service) http.Handler {
 			}
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
+		writeJsonHeaders(w)
 		w.WriteHeader(http.StatusOK)
 		w.Write(message)
 	})

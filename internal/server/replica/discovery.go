@@ -4,7 +4,8 @@ import (
 	"github.com/schollz/peerdiscovery"
 	"github.com/timonback/keyvaluestore/internal"
 	"github.com/timonback/keyvaluestore/internal/server/context"
-	"io/ioutil"
+	"github.com/timonback/keyvaluestore/internal/server/handler/model"
+	"github.com/timonback/keyvaluestore/internal/util"
 	"net/http"
 	"strconv"
 	"time"
@@ -18,21 +19,16 @@ type Peer struct {
 	IsOnline     bool
 }
 
-type Leader struct {
-	CurrentLeader string `json:"leader"`
-	NumElections  int    `json:"elections"`
-}
-
 var (
 	peers    = make(map[string]Peer)
 	leaderId = ""
 )
 
-func StartServerDiscovery(listenPort int) chan Leader {
+func StartServerDiscovery(listenPort int) chan model.StoreResponseReplicaStatus {
 	internal.Logger.Println("Discovery is starting...")
 
 	discoveredPeers := make(chan string, 10)
-	newLeader := make(chan Leader, 1)
+	newLeader := make(chan model.StoreResponseReplicaStatus, 1)
 
 	go peerdiscovery.Discover(peerdiscovery.Settings{
 		Limit:     -1,
@@ -55,11 +51,11 @@ func goVerifyNewPeers(discoveredPeers chan string) {
 	go func() {
 		for peerAddress := range discoveredPeers {
 			if _, ok := peers[peerAddress]; ok == false {
-				if available, id := IsPeerAvailable(peerAddress); available {
-					internal.Logger.Printf("Discovered server at %s with id %s", peerAddress, id)
+				if available, status := IsPeerAvailable(peerAddress); available {
+					internal.Logger.Printf("Discovered server at %s with id %s", peerAddress, status.Id)
 					now := time.Now()
 					peers[peerAddress] = Peer{
-						Id:           string(id),
+						Id:           status.Id,
 						Address:      peerAddress,
 						DiscoveredAt: now,
 						LastOnline:   now,
@@ -73,7 +69,7 @@ func goVerifyNewPeers(discoveredPeers chan string) {
 	}()
 }
 
-func goCheckPeersHealth(newLeader chan Leader) {
+func goCheckPeersHealth(newLeader chan model.StoreResponseReplicaStatus) {
 	ticker := time.NewTicker(5 * time.Second)
 	quit := make(chan struct{})
 	go func() {
@@ -89,40 +85,40 @@ func goCheckPeersHealth(newLeader chan Leader) {
 	}()
 }
 
-func leadershipCheck(newLeader chan Leader) {
-	newLeaderId := "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+func leadershipCheck(newLeader chan model.StoreResponseReplicaStatus) {
+	// TODO: Improve leadership check by syncing between all instances (agree on leadership at the same time)
+	leader := model.StoreResponseReplicaStatus{}
 	for _, peer := range peers {
-		if available, id := IsPeerAvailable(peer.Address); !available || string(id) != peer.Id {
+		if available, status := IsPeerAvailable(peer.Address); !available || status.Id != peer.Id {
 			internal.Logger.Printf("Removing unavailable/restarted peer %v", peer)
 			delete(peers, peer.Address)
-		} else if peer.Id < newLeaderId {
-			// TODO: Improve leader election
-			newLeaderId = peer.Id
+		} else if leader.Id == "" || leader.LogBookEntries < status.LogBookEntries || (leader.LogBookEntries == status.LogBookEntries && leader.Id < status.Id) {
+			leader = status
 		}
 	}
-	if leaderId != newLeaderId {
-		if newLeaderId != context.GetInstanceId() {
+	if leaderId != leader.Id {
+		if leader.Id != context.GetInstanceId() {
 			internal.Logger.Printf("Leadership lost")
 		} else {
 			internal.Logger.Println("Leadership gained")
 		}
-		newLeader <- Leader{
-			CurrentLeader: newLeaderId,
-			NumElections:  0,
-		}
+		leaderId = leader.Id
+
+		newLeader <- leader
 	}
-	leaderId = newLeaderId
 }
 
-func IsPeerAvailable(peerAddress string) (bool, []byte) {
-	resp, err := http.Get("http://" + peerAddress + context.HandlerPathInternalId)
+func IsPeerAvailable(peerAddress string) (bool, model.StoreResponseReplicaStatus) {
+	response := model.StoreResponseReplicaStatus{}
+
+	r, err := http.Get("http://" + peerAddress + context.HandlerPathInternalReplicaStatus)
 	if err == nil {
-		body, _ := ioutil.ReadAll(resp.Body)
-		if len(body) == context.DiscoveryIdLength {
-			return true, body
+		err := util.MapBodyToStruct(r.Body, r.Header, &response)
+		if err == nil && len(response.Id) == context.DiscoveryIdLength {
+			return true, response
 		}
 	}
-	return false, nil
+	return false, response
 }
 
 func GetOnlinePeers(includeMyself bool) []Peer {

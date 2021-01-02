@@ -12,7 +12,9 @@ import (
 	"github.com/timonback/keyvaluestore/internal/util"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type NetworkService struct {
@@ -34,10 +36,10 @@ func NewStoreNetworkService(store Service, listenPort int) *NetworkService {
 	return networkStore
 }
 
-func handleNewLeader(store *NetworkService, leaderCh chan replica.Leader) {
+func handleNewLeader(store *NetworkService, leaderCh chan model.StoreResponseReplicaStatus) {
 	for {
 		leader := <-leaderCh
-		if leader.CurrentLeader != context.GetInstanceId() {
+		if leader.Id != context.GetInstanceId() {
 			syncStoreWithLeader(store)
 		}
 	}
@@ -112,11 +114,29 @@ func (s *NetworkService) Create(path model2.Path, item model2.Item) error {
 	}
 
 	err := s.replica.Create(path, item)
+	s.UpdateLogbookEntry()
 
 	if err == nil {
 		s.syncStoreChanges(path, model.StoreSyncModeWrite, item)
 	}
 	return err
+}
+
+func (s *NetworkService) UpdateLogbookEntry() {
+	item, err := s.GetUnderlyingService().Read(context.LogBookEntryStorePath)
+	if err == nil {
+		counter, _ := strconv.Atoi(item.Content)
+		item.Content = strconv.Itoa(counter + 1)
+	} else {
+		internal.Logger.Println("Unable to read logbook counter. Creating new one")
+		item = model2.Item{
+			Content: "0",
+		}
+	}
+
+	item.Time = time.Now()
+
+	s.GetUnderlyingService().Write(context.LogBookEntryStorePath, item)
 }
 
 func (s *NetworkService) syncStoreChanges(path model2.Path, mode model.StoreSyncMode, item model2.Item) {
@@ -151,6 +171,7 @@ func (s *NetworkService) Update(path model2.Path, item model2.Item) error {
 	}
 
 	err := s.replica.Update(path, item)
+	s.UpdateLogbookEntry()
 
 	if err == nil {
 		s.syncStoreChanges(path, model.StoreSyncModeWrite, item)
@@ -163,7 +184,7 @@ func (s *NetworkService) Write(path model2.Path, item model2.Item) error {
 	if leader.Id != context.GetInstanceId() {
 		data := model.StoreRequestPost{Content: item.Content}
 		body, _ := json.Marshal(data)
-		resp, err := http.Post("http://"+leader.Address+context.HandlerPathStore+string(path), context.ApplicationJson, strings.NewReader(string(body)))
+		resp, err := http.Post("http://"+leader.Address+context.HandlerPathStore+string(path)+"?"+context.QueryParameterForce+"=true", context.ApplicationJson, strings.NewReader(string(body)))
 		if err == nil {
 			if resp.StatusCode != http.StatusOK {
 				response, _ := ioutil.ReadAll(resp.Body)
@@ -172,7 +193,9 @@ func (s *NetworkService) Write(path model2.Path, item model2.Item) error {
 		}
 		return err
 	}
+
 	err := s.replica.Write(path, item)
+	s.UpdateLogbookEntry()
 
 	if err == nil {
 		s.syncStoreChanges(path, model.StoreSyncModeWrite, item)
@@ -193,7 +216,9 @@ func (s *NetworkService) Delete(path model2.Path) error {
 		}
 		return err
 	}
+
 	err := s.replica.Delete(path)
+	s.UpdateLogbookEntry()
 
 	if err == nil {
 		s.syncStoreChanges(path, model.StoreSyncModeDelete, model2.Item{})

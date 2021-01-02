@@ -24,6 +24,7 @@ func StartServer(arguments *arguments.Server) {
 	router.Handle(context2.HandlerPathStore, handler.Store(arguments.Store))
 	router.Handle(context2.HandlerPathInternalId, handler.InternalId())
 	router.Handle(context2.HandlerPathInternalReplica, handler.Peers())
+	router.Handle(context2.HandlerPathInternalReplicaStatus, handler.PeerStatus(arguments.Store))
 	router.Handle(context2.HandlerPathInternalReplicaElection, handler.LeaderElection())
 	if arguments.NetworkStore != nil {
 		router.Handle(context2.HandlerPathInternalReplicaSync, handler.StoreSync(arguments.NetworkStore))

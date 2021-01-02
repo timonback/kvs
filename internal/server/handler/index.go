@@ -11,8 +11,7 @@ func Index() http.Handler {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
+		writeJsonHeaders(w)
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "Hello, World!")
 	})

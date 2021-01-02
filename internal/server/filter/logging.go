@@ -26,7 +26,7 @@ func Logging(Logger *log.Logger, wrappedHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestID, ok := r.Context().Value(context2.RequestIDKey).(string)
 
-		logRequest := r.URL.Path != context2.HandlerPathInternalId
+		logRequest := r.URL.Path != context2.HandlerPathInternalId && r.URL.Path != context2.HandlerPathInternalReplicaStatus
 		if logRequest {
 			if !ok {
 				requestID = "unknown"

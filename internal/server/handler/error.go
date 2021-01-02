@@ -11,7 +11,7 @@ type ErrorParameter struct {
 }
 
 const (
-	PARAMETER_PATH = "path"
+	ParameterPath = "path"
 )
 
 func CreateErrorParameters(parameters ...ErrorParameter) map[string]interface{} {
@@ -23,7 +23,7 @@ func CreateErrorParameters(parameters ...ErrorParameter) map[string]interface{} 
 }
 
 func HandleError(w http.ResponseWriter, r *http.Request, statusCode int, e error, errorParams map[string]interface{}) {
-	w.Header().Set("Content-Type", "application/json")
+	writeJsonHeaders(w)
 	w.WriteHeader(statusCode)
 
 	resp := make(map[string]interface{})

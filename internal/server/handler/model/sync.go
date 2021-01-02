@@ -22,3 +22,9 @@ type StoreSync struct {
 type StoreRequestSync struct {
 	Commands []StoreSync `json:"commands"`
 }
+
+type StoreResponseReplicaStatus struct {
+	Id             string `json:"id"`
+	LogBookEntries int    `json:"logbookEntries"`
+	IsLeader       bool   `json:"isLeader"`
+}
