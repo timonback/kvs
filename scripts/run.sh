@@ -1,4 +1,15 @@
 #!/usr/bin/env bash
+set -Eeuo pipefail
+
+trap cleanup SIGINT SIGTERM ERR EXIT
+
+cleanup() {
+  trap - SIGINT SIGTERM ERR EXIT
+  # script cleanup here
+  # Cleaning up server task
+  kill $(jobs -p)
+}
+
 
 HOST="localhost"
 PORT="4567"
@@ -14,7 +25,3 @@ timeout --foreground -s TERM 5 bash -c ' \
   done' "${HEALTH_URL}"
 
 ./kvs-cli -listen-addr "${HOST}:${PORT}"
-
-# Cleaning up server task
-kill $(jobs -p)
-
