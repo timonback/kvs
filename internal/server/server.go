@@ -8,7 +8,6 @@ import (
 	context2 "github.com/timonback/keyvaluestore/internal/server/context"
 	"github.com/timonback/keyvaluestore/internal/server/filter"
 	"github.com/timonback/keyvaluestore/internal/server/handler"
-	"github.com/timonback/keyvaluestore/internal/server/replica"
 	"net/http"
 	"os"
 	"os/signal"
@@ -69,8 +68,6 @@ func StartServer(arguments *arguments.Server) {
 		}
 		close(done)
 	}()
-
-	replica.StartServerDiscovery(arguments.ListenPort, arguments.DiscoveredPeers)
 
 	internal.Logger.Println("Server is ready to handle requests at", arguments.ListenPort)
 	handler.SetHealthy(handler.HEALTHY)

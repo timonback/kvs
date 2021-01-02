@@ -14,18 +14,18 @@ import (
 )
 
 type NetworkService struct {
-	replica   Service
-	getLeader func() replica.Peer
+	replica Service
 }
 
 /**
 Store implementation which internally uses the internal store for read and forwards manipulation actions to the getLeader
 Local store is only eventually consistent. Write/Delete actions are not waited for till completion
 */
-func NewStoreNetworkService(store Service, leader func() replica.Peer) *NetworkService {
+func NewStoreNetworkService(store Service, listenPort int) *NetworkService {
+	replica.StartServerDiscovery(listenPort)
+
 	return &NetworkService{
-		replica:   store,
-		getLeader: leader,
+		replica: store,
 	}
 }
 

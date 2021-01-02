@@ -28,8 +28,10 @@ var (
 	leaderId = ""
 )
 
-func StartServerDiscovery(listenPort int, discoveredPeers chan string) {
+func StartServerDiscovery(listenPort int) {
 	internal.Logger.Println("Discovery is starting...")
+
+	discoveredPeers := make(chan string, 10)
 
 	go peerdiscovery.Discover(peerdiscovery.Settings{
 		Limit:     -1,

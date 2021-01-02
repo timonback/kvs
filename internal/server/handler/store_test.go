@@ -82,10 +82,10 @@ func TestStoreHandlerGet(t *testing.T) {
 	}
 
 	jsonassert.New(t).Assertf(rr2.Body.String(), `{
-"key": "%s",
-"content": "%s",
-"lastModified": "<<PRESENCE>>"
-}`, "key", requestPost.Content)
+		"key": "%s",
+		"content": "%s",
+		"lastModified": "<<PRESENCE>>"
+	}`, "key", requestPost.Content)
 }
 
 func TestStoreHandlerDeleteNonExisting(t *testing.T) {

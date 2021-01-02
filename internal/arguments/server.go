@@ -2,7 +2,6 @@ package arguments
 
 import (
 	"flag"
-	"github.com/timonback/keyvaluestore/internal/server/replica"
 	"github.com/timonback/keyvaluestore/internal/store"
 	"os"
 )
@@ -10,8 +9,6 @@ import (
 type Server struct {
 	ListenPort int
 	Stop       chan os.Signal
-
-	DiscoveredPeers chan string
 
 	Store        store.Service
 	NetworkStore *store.NetworkService // possibly duplicated. Is type casting Store -> NetworkStore possible (currently in server.go)?
@@ -21,7 +18,6 @@ func ParseServerArguments() Server {
 	arguments := Server{}
 
 	arguments.Stop = make(chan os.Signal, 1)
-	arguments.DiscoveredPeers = make(chan string, 10)
 
 	flag.IntVar(&arguments.ListenPort, "listen-port", 8080, "server listen port")
 	withFilesystemStore := flag.Bool("filesystem", true, "use the filesystem store")
@@ -46,7 +42,7 @@ func ParseServerArguments() Server {
 		arguments.Store = store.NewStoreReplicaService(arguments.Store, filesystemStore)
 	}
 	if *withNetworkStore {
-		arguments.NetworkStore = store.NewStoreNetworkService(arguments.Store, replica.GetLeader)
+		arguments.NetworkStore = store.NewStoreNetworkService(arguments.Store, arguments.ListenPort)
 		arguments.Store = arguments.NetworkStore
 	}
 
