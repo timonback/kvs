@@ -24,6 +24,6 @@ jobs:
       # specify any bash command here prefixed with `run: `
       - run: ./scripts/build.sh
 
-      # - run: go test -v ./...
+      - run: go test -v ./...
 
       - run: ./scripts/run.sh
