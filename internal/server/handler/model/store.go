@@ -9,20 +9,12 @@ type StoreRequestPost struct {
 	Content string `json:"data"`
 }
 
-type StoreSyncMode string
-
-const (
-	StoreSyncModeDelete StoreSyncMode = "DELETE"
-	StoreSyncModeWrite  StoreSyncMode = "WRITE"
-)
-
-type StoreSync struct {
-	Content      string        `json:"data"`
-	Path         model.Path    `json:"path"`
-	LastModified time.Time     `json:"lastModified"`
-	Mode         StoreSyncMode `json:"mode"`
+type StoreReponseList struct {
+	Paths []model.Path `json:"paths"`
 }
 
-type StoreRequestSync struct {
-	Commands []StoreSync `json:"commands"`
+type StoreResponseGet struct {
+	Key          string    `json:"key"`
+	Content      string    `json:"content"`
+	LastModified time.Time `json:"lastModified"`
 }

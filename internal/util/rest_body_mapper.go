@@ -1,20 +1,21 @@
-package handler
+package util
 
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"strconv"
 )
 
-func MapBodyToStruct(r *http.Request, o interface{}) error {
-	headerContentTtype := r.Header.Get("Content-Type")
+func MapBodyToStruct(body io.Reader, header http.Header, o interface{}) error {
+	headerContentTtype := header.Get("Content-Type")
 	if headerContentTtype != "application/json" {
 		return errors.New("content-type is not application/json")
 	}
 
 	var unmarshalErr *json.UnmarshalTypeError
-	decoder := json.NewDecoder(r.Body)
+	decoder := json.NewDecoder(body)
 	err := decoder.Decode(o)
 	if err != nil {
 		if errors.As(err, &unmarshalErr) {

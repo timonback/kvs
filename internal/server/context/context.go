@@ -1,6 +1,8 @@
 package context
 
-import "github.com/timonback/keyvaluestore/internal"
+import (
+	"github.com/timonback/keyvaluestore/internal/util"
+)
 
 type key int
 
@@ -24,7 +26,7 @@ const (
 )
 
 var (
-	instanceId = internal.RandomString(DiscoveryIdLength)
+	instanceId = util.RandomString(DiscoveryIdLength)
 )
 
 func GetInstanceId() string {

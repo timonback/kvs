@@ -28,10 +28,11 @@ var (
 	leaderId = ""
 )
 
-func StartServerDiscovery(listenPort int) {
+func StartServerDiscovery(listenPort int) chan Leader {
 	internal.Logger.Println("Discovery is starting...")
 
 	discoveredPeers := make(chan string, 10)
+	newLeader := make(chan Leader, 1)
 
 	go peerdiscovery.Discover(peerdiscovery.Settings{
 		Limit:     -1,
@@ -45,7 +46,9 @@ func StartServerDiscovery(listenPort int) {
 	})
 
 	goVerifyNewPeers(discoveredPeers)
-	goCheckPeersHealth()
+	goCheckPeersHealth(newLeader)
+
+	return newLeader
 }
 
 func goVerifyNewPeers(discoveredPeers chan string) {
@@ -70,14 +73,14 @@ func goVerifyNewPeers(discoveredPeers chan string) {
 	}()
 }
 
-func goCheckPeersHealth() {
+func goCheckPeersHealth(newLeader chan Leader) {
 	ticker := time.NewTicker(5 * time.Second)
 	quit := make(chan struct{})
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
-				leadershipCheck()
+				leadershipCheck(newLeader)
 			case <-quit:
 				ticker.Stop()
 				return
@@ -86,7 +89,7 @@ func goCheckPeersHealth() {
 	}()
 }
 
-func leadershipCheck() {
+func leadershipCheck(newLeader chan Leader) {
 	newLeaderId := "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
 	for _, peer := range peers {
 		if available, id := IsPeerAvailable(peer.Address); !available || string(id) != peer.Id {
@@ -102,6 +105,10 @@ func leadershipCheck() {
 			internal.Logger.Printf("Leadership lost")
 		} else {
 			internal.Logger.Println("Leadership gained")
+		}
+		newLeader <- Leader{
+			CurrentLeader: newLeaderId,
+			NumElections:  0,
 		}
 	}
 	leaderId = newLeaderId

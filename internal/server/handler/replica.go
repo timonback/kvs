@@ -6,6 +6,7 @@ import (
 	"github.com/timonback/keyvaluestore/internal/server/replica"
 	store2 "github.com/timonback/keyvaluestore/internal/store"
 	model2 "github.com/timonback/keyvaluestore/internal/store/model"
+	"github.com/timonback/keyvaluestore/internal/util"
 	"net/http"
 )
 
@@ -30,7 +31,7 @@ func Peers() http.Handler {
 func StoreSync(store *store2.NetworkService) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		itemRequest := model.StoreRequestSync{}
-		if err := MapBodyToStruct(r, &itemRequest); err != nil {
+		if err := util.MapBodyToStruct(r.Body, r.Header, &itemRequest); err != nil {
 			HandleError(w, r, http.StatusBadRequest, err, nil)
 			return
 		}
