@@ -3,6 +3,7 @@ package context
 import (
 	"github.com/timonback/keyvaluestore/internal/store/model"
 	"github.com/timonback/keyvaluestore/internal/util"
+	"time"
 )
 
 type key int
@@ -30,8 +31,13 @@ const (
 
 var (
 	instanceId = util.RandomString(DiscoveryIdLength)
+	uptime     = time.Now()
 )
 
 func GetInstanceId() string {
 	return instanceId
+}
+
+func GetUpTime() time.Time {
+	return uptime
 }

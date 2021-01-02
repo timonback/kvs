@@ -24,7 +24,8 @@ type StoreRequestSync struct {
 }
 
 type StoreResponseReplicaStatus struct {
-	Id             string `json:"id"`
-	LogBookEntries int    `json:"logbookEntries"`
-	IsLeader       bool   `json:"isLeader"`
+	Id             string    `json:"id"`
+	Uptime         time.Time `json:"uptime"`
+	LogBookEntries int       `json:"logbookEntries"`
+	IsLeader       bool      `json:"isLeader"`
 }

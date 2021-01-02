@@ -92,7 +92,7 @@ func leadershipCheck(newLeader chan model.StoreResponseReplicaStatus) {
 		if available, status := IsPeerAvailable(peer.Address); !available || status.Id != peer.Id {
 			internal.Logger.Printf("Removing unavailable/restarted peer %v", peer)
 			delete(peers, peer.Address)
-		} else if leader.Id == "" || leader.LogBookEntries < status.LogBookEntries || (leader.LogBookEntries == status.LogBookEntries && leader.Id < status.Id) {
+		} else if leader.Id == "" || leader.LogBookEntries < status.LogBookEntries || (leader.LogBookEntries == status.LogBookEntries && leader.Uptime.After(status.Uptime)) {
 			leader = status
 		}
 	}

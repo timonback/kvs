@@ -16,6 +16,7 @@ func PeerStatus(store store2.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		status := model.StoreResponseReplicaStatus{
 			Id:             context.GetInstanceId(),
+			Uptime:         context.GetUpTime(),
 			LogBookEntries: 0,
 			IsLeader:       context.GetInstanceId() == replica.GetLeader().Id,
 		}
