@@ -35,7 +35,7 @@ func listItem(arguments arguments.Cli) {
 
 		resp.Body.Close()
 	} else {
-		internal.Logger.Println("No response")
+		internal.Logger.Fatalln("No response")
 	}
 }
 
@@ -54,7 +54,7 @@ func getItem(arguments arguments.Cli) {
 
 		resp.Body.Close()
 	} else {
-		internal.Logger.Println("No response")
+		internal.Logger.Fatalln("No response")
 	}
 }
 
