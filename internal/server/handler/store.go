@@ -29,6 +29,7 @@ func Store(store store2.Service) http.Handler {
 			response := model.StoreReponseList{
 				Paths: paths,
 			}
+			panic("Testing")
 
 			message, _ = json.Marshal(response)
 		} else if r.Method == "GET" {
