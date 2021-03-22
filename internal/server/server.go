@@ -8,6 +8,7 @@ import (
 	context2 "github.com/timonback/keyvaluestore/internal/server/context"
 	"github.com/timonback/keyvaluestore/internal/server/filter"
 	"github.com/timonback/keyvaluestore/internal/server/handler"
+	"github.com/timonback/keyvaluestore/internal/server/health"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,7 +18,7 @@ import (
 
 func StartServer(arguments *arguments.ServerArguments) {
 	internal.Logger.Println("Server is starting...")
-	handler.SetUnhealthy(handler.NON_HEALTHY_SERVER)
+	health.SetUnhealthy(health.NON_HEALTHY_SERVER)
 
 	server := createServer(arguments)
 
@@ -35,7 +36,7 @@ func StartServer(arguments *arguments.ServerArguments) {
 	go func() {
 		<-quit
 		internal.Logger.Println("Server is shutting down...")
-		handler.SetUnhealthy(handler.NON_HEALTHY_SERVER)
+		health.SetUnhealthy(health.NON_HEALTHY_SERVER)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
@@ -48,7 +49,7 @@ func StartServer(arguments *arguments.ServerArguments) {
 	}()
 
 	internal.Logger.Println("Server is ready to handle requests at", arguments.ListenPort)
-	handler.SetHealthy(handler.NON_HEALTHY_SERVER)
+	health.SetHealthy(health.NON_HEALTHY_SERVER)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		internal.Logger.Fatalf("Could not listen on %d: %v\n", arguments.ListenPort, err)
 	}

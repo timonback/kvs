@@ -5,6 +5,7 @@ import (
 	"github.com/timonback/keyvaluestore/internal"
 	"github.com/timonback/keyvaluestore/internal/server/context"
 	"github.com/timonback/keyvaluestore/internal/server/handler/model"
+	"github.com/timonback/keyvaluestore/internal/server/health"
 	"github.com/timonback/keyvaluestore/internal/util"
 	"net/http"
 	"strconv"
@@ -26,6 +27,7 @@ var (
 
 func StartServerDiscovery(listenPort int) chan model.StoreResponseReplicaStatus {
 	internal.Logger.Println("Discovery is starting...")
+	health.SetUnhealthy(health.NON_HEALTHY_LEADER)
 
 	discoveredPeers := make(chan string, 10)
 	newLeader := make(chan model.StoreResponseReplicaStatus, 1)
@@ -104,6 +106,7 @@ func leadershipCheck(newLeader chan model.StoreResponseReplicaStatus) {
 		}
 		leaderId = leader.Id
 
+		health.SetHealthy(health.NON_HEALTHY_LEADER)
 		newLeader <- leader
 	}
 }

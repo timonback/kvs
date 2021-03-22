@@ -1,6 +1,7 @@
 package handler
 
 import (
+	health2 "github.com/timonback/keyvaluestore/internal/server/health"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -8,10 +9,10 @@ import (
 
 func TestHealthCheckHandlerNonHealthy(t *testing.T) {
 	req := createHealthyRequest(t)
-	healthy = HEALTHY
+	resetToHealthyState()
 
 	rr := httptest.NewRecorder()
-	SetUnhealthy(NON_HEALTHY_SERVER)
+	health2.SetUnhealthy(health2.NON_HEALTHY_SERVER)
 
 	Healthz().ServeHTTP(rr, req)
 	if status := rr.Code; status != http.StatusServiceUnavailable {
@@ -19,16 +20,21 @@ func TestHealthCheckHandlerNonHealthy(t *testing.T) {
 	}
 }
 
+func resetToHealthyState() {
+	health2.SetHealthy(health2.NON_HEALTHY_SERVER)
+	health2.SetHealthy(health2.NON_HEALTHY_LEADER)
+}
+
 func TestHealthCheckHandlerHealthy(t *testing.T) {
 	req := createHealthyRequest(t)
-	healthy = HEALTHY
+	resetToHealthyState()
 
 	rr := httptest.NewRecorder()
-	SetHealthy(HEALTHY)
+	health2.SetHealthy(health2.HEALTHY)
 
 	Healthz().ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusNoContent {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusNoContent)
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 }
 
@@ -38,22 +44,4 @@ func createHealthyRequest(t *testing.T) *http.Request {
 		t.Fatal(err)
 	}
 	return req
-}
-
-func TestDifferentHealthIssues(t *testing.T) {
-	healthy = HEALTHY
-
-	SetUnhealthy(NON_HEALTHY_SERVER)
-	SetUnhealthy(NON_HEALTHY_ELECTION)
-	if IsHealth() {
-		t.Fatal("Should be unhealthy")
-	}
-	SetHealthy(NON_HEALTHY_SERVER)
-	if IsHealth() {
-		t.Fatal("Should be unhealthy")
-	}
-	SetHealthy(NON_HEALTHY_ELECTION)
-	if !IsHealth() {
-		t.Fatal("Should be healthy")
-	}
 }
