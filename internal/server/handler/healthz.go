@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	HEALTHY     int32 = 1
-	NON_HEALTHY int32 = 0
+	HEALTHY     int32 = 0
+	NON_HEALTHY int32 = 1
 )
 
 var (
@@ -20,7 +20,7 @@ func SetHealthy(healthyUpdate int32) {
 
 func Healthz() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if atomic.LoadInt32(&healthy) == 1 {
+		if atomic.LoadInt32(&healthy) == HEALTHY {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
