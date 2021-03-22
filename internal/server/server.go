@@ -15,34 +15,9 @@ import (
 	"time"
 )
 
-func StartServer(arguments *arguments.Server) {
+func StartServer(arguments *arguments.ServerArguments) {
 	internal.Logger.Println("Server is starting...")
-
-	router := http.NewServeMux()
-	router.Handle("/healthz", handler.Healthz())
-	router.Handle("/hello", handler.Index())
-	router.Handle(context2.HandlerPathStore, handler.Store(arguments.Store))
-	router.Handle(context2.HandlerPathInternalId, handler.InternalId())
-	router.Handle(context2.HandlerPathInternalReplica, handler.Peers())
-	router.Handle(context2.HandlerPathInternalReplicaStatus, handler.PeerStatus(arguments.Store))
-	router.Handle(context2.HandlerPathInternalReplicaElection, handler.LeaderElection())
-	if arguments.NetworkStore != nil {
-		router.Handle(context2.HandlerPathInternalReplicaSync, handler.StoreSync(arguments.NetworkStore))
-	}
-	router.Handle("/ui/", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
-
-	nextRequestID := func() string {
-		return fmt.Sprintf("%d", time.Now().UnixNano())
-	}
-
-	server := &http.Server{
-		Addr:         ":" + strconv.Itoa(arguments.ListenPort),
-		Handler:      filter.Tracing(nextRequestID)(filter.Logging(internal.Logger, router)),
-		ErrorLog:     internal.Logger,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  15 * time.Second,
-	}
+	server := createServer(arguments)
 
 	done := make(chan bool)
 	quit := make(chan os.Signal, 1)
@@ -50,7 +25,7 @@ func StartServer(arguments *arguments.Server) {
 	signal.Notify(quit, os.Kill)
 	go func() {
 		<-arguments.Stop
-		internal.Logger.Println("Received shutdown command...")
+		internal.Logger.Println("Received internal shutdown command...")
 		quit <- os.Interrupt
 		close(arguments.Stop)
 	}()
@@ -78,4 +53,33 @@ func StartServer(arguments *arguments.Server) {
 
 	<-done
 	internal.Logger.Println("Server stopped")
+}
+
+func createServer(arguments *arguments.ServerArguments) *http.Server {
+	router := http.NewServeMux()
+	router.Handle("/healthz", handler.Healthz())
+	router.Handle("/hello", handler.Index())
+	router.Handle(context2.HandlerPathStore, handler.Store(arguments.Store))
+	router.Handle(context2.HandlerPathInternalId, handler.InternalId())
+	router.Handle(context2.HandlerPathInternalReplica, handler.Peers())
+	router.Handle(context2.HandlerPathInternalReplicaStatus, handler.PeerStatus(arguments.Store))
+	router.Handle(context2.HandlerPathInternalReplicaElection, handler.LeaderElection())
+	if arguments.NetworkStore != nil {
+		router.Handle(context2.HandlerPathInternalReplicaSync, handler.StoreSync(arguments.NetworkStore))
+	}
+	router.Handle("/ui/", http.StripPrefix("/", http.FileServer(http.Dir("static"))))
+
+	nextRequestID := func() string {
+		return fmt.Sprintf("%d", time.Now().UnixNano())
+	}
+
+	server := &http.Server{
+		Addr:         ":" + strconv.Itoa(arguments.ListenPort),
+		Handler:      filter.Tracing(nextRequestID)(filter.Logging(internal.Logger, router)),
+		ErrorLog:     internal.Logger,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  15 * time.Second,
+	}
+	return server
 }
