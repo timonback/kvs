@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-type Server struct {
+type ServerArguments struct {
 	ListenPort int
 	Stop       chan os.Signal
 
@@ -14,20 +14,22 @@ type Server struct {
 	NetworkStore *store.NetworkService // possibly duplicated. Is type casting Store -> NetworkStore possible (currently in server.go)?
 }
 
-func ParseServerArguments() Server {
-	arguments := Server{}
+func ParseServerArguments() ServerArguments {
+	arguments := ServerArguments{}
 
 	arguments.Stop = make(chan os.Signal, 1)
 
 	flag.IntVar(&arguments.ListenPort, "listen-port", 8080, "server listen port")
 	withFilesystemStore := flag.Bool("filesystem", true, "use the filesystem store")
 	withNetworkStore := flag.Bool("network", true, "sync kvs with multiple instances in the same network")
+
+	filesystemFolder := flag.String("filesystem-folder", "data", "relative path to the storage folder")
 	flag.Parse()
 
 	arguments.Store = store.NewStoreInmemoryService("")
 	if *withFilesystemStore {
 		pwd, _ := os.Getwd()
-		folder := pwd + "/data"
+		folder := pwd + "/" + *filesystemFolder
 		_ = os.MkdirAll(folder, 0755)
 		filesystemStore := store.NewStoreFilesystemService(folder, "")
 
