@@ -23,9 +23,17 @@ type StoreRequestSync struct {
 	Commands []StoreSync `json:"commands"`
 }
 
+type StoreReplicaState int
+
+const (
+	Primary StoreReplicaState = iota
+	Secondary
+	Election
+)
+
 type StoreResponseReplicaStatus struct {
-	Id             string    `json:"id"`
-	Uptime         time.Time `json:"uptime"`
-	LogBookEntries int       `json:"logbookEntries"`
-	IsLeader       bool      `json:"isLeader"`
+	Id             string            `json:"id"`
+	Uptime         time.Time         `json:"uptime"`
+	LogBookEntries int               `json:"logbookEntries"`
+	State          StoreReplicaState `json:"state"`
 }

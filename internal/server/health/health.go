@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	HEALTHY            int32 = 0b00000000
-	NON_HEALTHY_SERVER int32 = 0b00000001
-	NON_HEALTHY_LEADER int32 = 0b00000010
+	HEALTHY        int32 = 0b00000000
+	SERVER_STATUS  int32 = 0b00000001
+	REPLICA_STATUS int32 = 0b00000010
 )
 
 var (
@@ -19,7 +19,7 @@ var (
 type Status struct {
 	Overall bool `json:"global"`
 	Server  bool `json:"server"`
-	Leader  bool `json:"leader"`
+	Replica bool `json:"replica"`
 }
 
 func SetHealthy(healthyUpdate int32) {
@@ -48,7 +48,7 @@ func GetHealthStatus() Status {
 	health := atomic.LoadInt32(&healthy)
 	return Status{
 		Overall: health == HEALTHY,
-		Server:  health&NON_HEALTHY_SERVER == 0,
-		Leader:  health&NON_HEALTHY_LEADER == 0,
+		Server:  health&SERVER_STATUS == 0,
+		Replica: health&REPLICA_STATUS == 0,
 	}
 }

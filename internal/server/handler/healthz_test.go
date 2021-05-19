@@ -12,7 +12,7 @@ func TestHealthCheckHandlerNonHealthy(t *testing.T) {
 	resetToHealthyState()
 
 	rr := httptest.NewRecorder()
-	health2.SetUnhealthy(health2.NON_HEALTHY_SERVER)
+	health2.SetUnhealthy(health2.SERVER_STATUS)
 
 	Healthz().ServeHTTP(rr, req)
 	if status := rr.Code; status != http.StatusServiceUnavailable {
@@ -21,8 +21,8 @@ func TestHealthCheckHandlerNonHealthy(t *testing.T) {
 }
 
 func resetToHealthyState() {
-	health2.SetHealthy(health2.NON_HEALTHY_SERVER)
-	health2.SetHealthy(health2.NON_HEALTHY_LEADER)
+	health2.SetHealthy(health2.SERVER_STATUS)
+	health2.SetHealthy(health2.REPLICA_STATUS)
 }
 
 func TestHealthCheckHandlerHealthy(t *testing.T) {

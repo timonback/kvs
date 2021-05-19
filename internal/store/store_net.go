@@ -46,8 +46,8 @@ func handleNewLeader(store *NetworkService, leaderCh chan model.StoreResponseRep
 }
 
 func syncStoreWithLeader(store *NetworkService) {
-	internal.Logger.Println("Starting full syncing process from new leader")
 	leader := replica.GetLeader()
+	internal.Logger.Println(fmt.Sprintf("Starting full syncing process from new leader %s", leader.Address))
 
 	// Remove all existing items first to avoid conflicts
 	for _, path := range store.Paths() {
@@ -160,7 +160,7 @@ func (s *NetworkService) Update(path model2.Path, item model2.Item) error {
 	if leader.Id != context.GetInstanceId() {
 		data := model.StoreRequestPost{Content: item.Content}
 		body, _ := json.Marshal(data)
-		resp, err := http.Post("http://"+leader.Address+context.HandlerPathStore+string(path), context.ApplicationJson, strings.NewReader(string(body)))
+		resp, err := util.HttpPut("http://"+leader.Address+context.HandlerPathStore+string(path), context.ApplicationJson, strings.NewReader(string(body)))
 		if err == nil {
 			if resp.StatusCode != http.StatusOK {
 				response, _ := ioutil.ReadAll(resp.Body)

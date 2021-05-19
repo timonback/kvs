@@ -5,16 +5,16 @@ import "testing"
 func TestDifferentHealthIssues(t *testing.T) {
 	healthy = HEALTHY
 
-	SetUnhealthy(NON_HEALTHY_SERVER)
-	SetUnhealthy(NON_HEALTHY_LEADER)
+	SetUnhealthy(SERVER_STATUS)
+	SetUnhealthy(REPLICA_STATUS)
 	if IsHealth() {
 		t.Fatal("Should be unhealthy")
 	}
-	SetHealthy(NON_HEALTHY_SERVER)
+	SetHealthy(SERVER_STATUS)
 	if IsHealth() {
 		t.Fatal("Should be unhealthy")
 	}
-	SetHealthy(NON_HEALTHY_LEADER)
+	SetHealthy(REPLICA_STATUS)
 	if !IsHealth() {
 		t.Fatal("Should be healthy")
 	}

@@ -1,0 +1,18 @@
+POST http://localhost:8081/healthz
+Content-Type: application/json
+
+{}
+
+###
+
+PUT http://localhost:8081/api/store/a
+Content-Type: application/json
+
+{
+  "data": "abcdef"
+}
+
+###
+
+GET http://localhost:8081/api/store/a
+Content-Type: application/json

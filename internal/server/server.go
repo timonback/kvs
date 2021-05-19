@@ -18,7 +18,7 @@ import (
 
 func StartServer(arguments *arguments.ServerArguments) {
 	internal.Logger.Println("Server is starting...")
-	health.SetUnhealthy(health.NON_HEALTHY_SERVER)
+	health.SetUnhealthy(health.SERVER_STATUS)
 
 	server := createServer(arguments)
 
@@ -36,7 +36,7 @@ func StartServer(arguments *arguments.ServerArguments) {
 	go func() {
 		<-quit
 		internal.Logger.Println("Server is shutting down...")
-		health.SetUnhealthy(health.NON_HEALTHY_SERVER)
+		health.SetUnhealthy(health.SERVER_STATUS)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
@@ -49,7 +49,7 @@ func StartServer(arguments *arguments.ServerArguments) {
 	}()
 
 	internal.Logger.Println("Server is ready to handle requests at", arguments.ListenPort)
-	health.SetHealthy(health.NON_HEALTHY_SERVER)
+	health.SetHealthy(health.SERVER_STATUS)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		internal.Logger.Fatalf("Could not listen on %d: %v\n", arguments.ListenPort, err)
 	}

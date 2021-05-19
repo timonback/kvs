@@ -18,7 +18,7 @@ func PeerStatus(store store2.Service) http.Handler {
 			Id:             context.GetInstanceId(),
 			Uptime:         context.GetUpTime(),
 			LogBookEntries: 0,
-			IsLeader:       context.GetInstanceId() == replica.GetLeader().Id,
+			State:          replica.GetReplicaState(),
 		}
 		if logbook, err := store.Read(context.LogBookEntryStorePath); err == nil {
 			logBookEntries, _ := strconv.Atoi(logbook.Content)

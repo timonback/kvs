@@ -1,6 +1,7 @@
 package replica
 
 import (
+	"fmt"
 	"github.com/schollz/peerdiscovery"
 	"github.com/timonback/keyvaluestore/internal"
 	"github.com/timonback/keyvaluestore/internal/server/context"
@@ -21,13 +22,14 @@ type Peer struct {
 }
 
 var (
+	state    = model.Election
 	peers    = make(map[string]Peer)
 	leaderId = ""
 )
 
 func StartServerDiscovery(listenPort int) chan model.StoreResponseReplicaStatus {
 	internal.Logger.Println("Discovery is starting...")
-	health.SetUnhealthy(health.NON_HEALTHY_LEADER)
+	health.SetUnhealthy(health.REPLICA_STATUS)
 
 	discoveredPeers := make(chan string, 10)
 	newLeader := make(chan model.StoreResponseReplicaStatus, 1)
@@ -91,22 +93,32 @@ func leadershipCheck(newLeader chan model.StoreResponseReplicaStatus) {
 	// TODO: Improve leadership check by syncing between all instances (agree on leadership at the same time)
 	leader := model.StoreResponseReplicaStatus{}
 	for _, peer := range peers {
-		if available, status := IsPeerAvailable(peer.Address); !available || status.Id != peer.Id {
+		if available, peerStatus := IsPeerAvailable(peer.Address); !available || peerStatus.Id != peer.Id {
 			internal.Logger.Printf("Removing unavailable/restarted peer %v", peer)
 			delete(peers, peer.Address)
-		} else if leader.Id == "" || leader.LogBookEntries < status.LogBookEntries || (leader.LogBookEntries == status.LogBookEntries && leader.Uptime.After(status.Uptime)) {
-			leader = status
+			if peer.Id == leaderId {
+				internal.Logger.Printf("Removed peer was the leader. Restarting election")
+				leaderId = ""
+				state = model.Election
+				health.SetUnhealthy(health.REPLICA_STATUS)
+			}
+		} else if leader.Id == "" || leader.LogBookEntries < peerStatus.LogBookEntries || (leader.LogBookEntries == peerStatus.LogBookEntries && leader.Uptime.After(peerStatus.Uptime)) {
+			if peerStatus.State == model.Primary || peerStatus.State == model.Election {
+				leader = peerStatus
+			}
 		}
 	}
-	if leaderId != leader.Id {
+	if leader.Id != "" && leaderId != leader.Id {
+		leaderId = leader.Id
 		if leader.Id != context.GetInstanceId() {
-			internal.Logger.Printf("Leadership lost")
+			internal.Logger.Printf(fmt.Sprintf("Leadership lost. New leader is at %s", GetLeader().Address))
+			state = model.Secondary
 		} else {
 			internal.Logger.Println("Leadership gained")
+			state = model.Primary
 		}
-		leaderId = leader.Id
 
-		health.SetHealthy(health.NON_HEALTHY_LEADER)
+		health.SetHealthy(health.REPLICA_STATUS)
 		newLeader <- leader
 	}
 }
@@ -145,4 +157,8 @@ func GetLeader() Peer {
 		}
 	}
 	return Peer{}
+}
+
+func GetReplicaState() model.StoreReplicaState {
+	return state
 }
