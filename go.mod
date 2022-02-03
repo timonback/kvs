@@ -4,5 +4,5 @@ go 1.15
 
 require (
 	github.com/kinbiko/jsonassert v1.0.1
-	github.com/schollz/peerdiscovery v1.6.3
+	github.com/schollz/peerdiscovery v1.6.11
 )
